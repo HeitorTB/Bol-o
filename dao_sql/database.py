@@ -1,12 +1,17 @@
-import sqlite3
+import libsql
+import streamlit as st
 
 class database:
     conn = None
-    nome_bd = "tabela.db"
     
     @classmethod
     def abrir(cls):
-        cls.conn = sqlite3.connect(cls.nome_bd)
+        # 1. Pega as chaves de acesso que vamos esconder no Streamlit
+        url_banco = st.secrets["TURSO_DATABASE_URL"]
+        token_banco = st.secrets["TURSO_AUTH_TOKEN"]
+        
+        # 2. Conecta no Turso usando as chaves!
+        cls.conn = libsql.connect(database=url_banco, auth_token=token_banco)
         cls.conn.execute("PRAGMA foreign_keys = ON") 
 
     @classmethod
@@ -63,4 +68,4 @@ class database:
             ); 
         """)
         
-        cls.fechar() 
+        cls.fechar()
