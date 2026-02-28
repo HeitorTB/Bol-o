@@ -3,7 +3,7 @@ from templates.loginUI import LoginUI
 from templates.abrirContaUI import AbrirContaUI
 from templates.CadastrarJogosUI import cadastrarJogoUI
 from templates.atualizarPlacarUI import AtualizarPlacarUI
-from templates.minhasApostasUI import MeusPalpitesUI
+from templates.apostasUI import MeusPalpitesUI
 from templates.FazerApostasUI import fazerApostasUI
 from templates.visualizarPlacarUI import VisualizarPlacarUI
 from views import View
