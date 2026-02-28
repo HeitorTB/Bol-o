@@ -8,11 +8,11 @@ class LoginUI:
         senha = st.text_input("Informe a senha", type="password")
 
         if st.button("Entrar"):
-            usuario_valido = None
             c = View.usuario_autenticar(email, senha)
             if c:
-                st.session_state['logado'] = True
-                st.session_state['usuario_logado'] = usuario_valido
+                st.session_state["usuario_tipo"] = "logado"
+                st.session_state['usuario_id'] = c["id"]
+                st.session_state["usuario_nome"] = c["nome"]
                 st.success("Login realizado com sucesso!")
                 st.rerun()
             else:

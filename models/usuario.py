@@ -46,7 +46,7 @@ class usuarioDAO(DAO):
         sql = "SELECT * FROM usuario"
         cursor = cls.execute(sql)
         rows = cursor.fetchall()
-        objs = [usuario(id, nome, email, senha, pontos) for (id, nome, email, senha, pontos) in rows]
+        objs = [Usuario(id, nome, email, senha, pontos) for (id, nome, email, senha, pontos) in rows]
         cls.fechar()
         return objs
     
@@ -56,7 +56,7 @@ class usuarioDAO(DAO):
         sql = "SELECT * FROM usuario WHERE id = ?"
         cursor = cls.execute(sql, (id,))
         row = cursor.fetchone()
-        obj = usuario(*row) if row else None
+        obj = Usuario(*row) if row else None
         cls.fechar()
         return obj
     

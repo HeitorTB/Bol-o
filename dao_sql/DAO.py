@@ -3,7 +3,7 @@ from datetime import datetime
 
 class DAO:
     conn = None
-    nome_bd="sistema_estudos.db"
+    nome_bd="tabela.db"
 
     @classmethod
     def abrir(cls):
