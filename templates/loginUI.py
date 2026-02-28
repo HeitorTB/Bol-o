@@ -4,6 +4,7 @@ from views import View
 class LoginUI:
     def main():
         st.header("Entrar")
+        st.text("(Entre se você já fez o cadastro)")
         email = st.text_input("Informe o e-mail")
         senha = st.text_input("Informe a senha", type="password")
 

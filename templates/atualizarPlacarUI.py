@@ -46,7 +46,7 @@ class AtualizarPlacarUI:
             submit = st.form_submit_button("Salvar Resultado Oficial")
 
             if submit:
-                # 4. Manda salvar no banco de dados!
+                # 4. Manda salvar o jogo no banco de dados
                 View.jogo_atualizar(
                     jogo_selecionado.get_id(),
                     jogo_selecionado.get_time_a(),
@@ -56,5 +56,9 @@ class AtualizarPlacarUI:
                     gols_b,
                     finalizado
                 )
-                st.success("Placar oficial atualizado com sucesso!")
+                
+                if finalizado:
+                    View.processar_pontuacao_jogo(jogo_selecionado.get_id(), gols_a, gols_b)
+                
+                st.success("Placar oficial atualizado com sucesso e pontos distribuídos!")
                 st.rerun() # Atualiza a tela para mostrar os dados novos

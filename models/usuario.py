@@ -76,3 +76,17 @@ class usuarioDAO(DAO):
         sql = "DELETE FROM usuario WHERE id=?"
         cls.execute(sql, (obj.get_id(),))
         cls.fechar()
+    
+    @classmethod
+    def atualizar_todos_pontos(cls):
+        cls.abrir()
+        sql = """
+            UPDATE usuario
+            SET pontos = (
+                SELECT COALESCE(SUM(pontos_ganhos), 0) 
+                FROM palpites 
+                WHERE usuario_id = usuario.id
+            )
+        """
+        cls.execute(sql)
+        cls.fechar()

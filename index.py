@@ -1,9 +1,11 @@
 import streamlit as st
 from templates.loginUI import LoginUI
 from templates.abrirContaUI import AbrirContaUI
-from templates.minhasApostasUI import MinhasApostasUI
 from templates.CadastrarJogosUI import cadastrarJogoUI
 from templates.atualizarPlacarUI import AtualizarPlacarUI
+from templates.minhasApostasUI import MeusPalpitesUI
+from templates.FazerApostasUI import fazerApostasUI
+from templates.visualizarPlacarUI import VisualizarPlacarUI
 from views import View
 from dao_sql.database import database
 
@@ -22,9 +24,10 @@ class IndexUI:
     
     @staticmethod
     def menu_usuario():
-        op = st.sidebar.selectbox("Menu", ["Minhas Apostas", "Visualizar Placar"])
-        if op == "Minhas apostas": MinhasApostasUI.main()
-        if op == "Visualizar Placar": visualizarPlacarUI.main()
+        op = st.sidebar.selectbox("Menu", ["Fazer Apostas","Minhas Apostas", "Visualizar Placar"])
+        if op == "Minhas Apostas": MeusPalpitesUI.main()
+        if op == "Fazer Apostas": fazerApostasUI.main()
+        if op == "Visualizar Placar": VisualizarPlacarUI.main()
     
     @staticmethod
     def sidebar():
