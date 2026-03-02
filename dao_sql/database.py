@@ -10,36 +10,35 @@ class database:
         url_banco = st.secrets["TURSO_DATABASE_URL"]
         token_banco = st.secrets["TURSO_AUTH_TOKEN"]
         
-        # 💡 Ajuste CORRETO: Trocar 'libsql://' ou 'wss://' por 'https://'
-        # Isso força uma conexão HTTP normal e evita o erro 505 'Invalid response status'
+        # 2. Força o HTTPS por garantia (caso ainda esteja libsql:// nos secrets locais)
         if url_banco.startswith("libsql://"):
             url_banco = url_banco.replace("libsql://", "https://")
         elif url_banco.startswith("wss://"):
             url_banco = url_banco.replace("wss://", "https://")
         
         try:
-            # 2. Conecta no Turso usando a biblioteca atualizada
+            # 3. Cria uma NOVA conexão sempre que for chamado
             cls.conn = libsql.create_client_sync(url=url_banco, auth_token=token_banco)
-            
-            # Habilita chaves estrangeiras
             cls.conn.execute("PRAGMA foreign_keys = ON") 
         except Exception as e:
             st.error(f"Erro crítico ao conectar no banco: {e}")
 
     @classmethod
     def fechar(cls):
-        if cls.conn:
-            cls.conn.close()
-            cls.conn = None
+        if cls.conn is not None:
+            try:
+                cls.conn.close()
+            except:
+                pass
+            cls.conn = None # ISSO AQUI EVITA O ERRO CLIENT_CLOSED!
 
     @classmethod
     def execute(cls, sql, params=None):
-        # Garante que a conexão esteja aberta se por acaso estiver fechada
-        if cls.conn is None:
-            cls.abrir()
-        
-        # O libsql-client executa direto da conexão e retorna um objeto ResultSet
-        return cls.conn.execute(sql, params or [])
+        # Para o Streamlit, o jeito mais seguro é abrir, executar e fechar a cada comando
+        cls.abrir()
+        resultado = cls.conn.execute(sql, params or [])
+        cls.fechar() # Fecha limpinho logo após o uso
+        return resultado
 
     @classmethod
     def criar_tabelas(cls):
