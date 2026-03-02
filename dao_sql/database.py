@@ -10,9 +10,11 @@ class database:
         url_banco = st.secrets["TURSO_DATABASE_URL"]
         token_banco = st.secrets["TURSO_AUTH_TOKEN"]
         
-        # 💡 Ajuste preventivo: Se a URL começar com 'wss://', trocamos por 'https://'
-        # Isso evita o erro 505 'Invalid response status' no libsql-client
-        if url_banco.startswith("wss://"):
+        # 💡 Ajuste CORRETO: Trocar 'libsql://' ou 'wss://' por 'https://'
+        # Isso força uma conexão HTTP normal e evita o erro 505 'Invalid response status'
+        if url_banco.startswith("libsql://"):
+            url_banco = url_banco.replace("libsql://", "https://")
+        elif url_banco.startswith("wss://"):
             url_banco = url_banco.replace("wss://", "https://")
         
         try:
