@@ -10,24 +10,34 @@ class database:
         url_banco = st.secrets["TURSO_DATABASE_URL"]
         token_banco = st.secrets["TURSO_AUTH_TOKEN"]
         
-        # 2. Conecta no Turso (Ajustado para a sintaxe correta do libsql-client)
-        # Usamos o sync para facilitar o uso com Streamlit
-        cls.conn = libsql.create_client_sync(url=url_banco, auth_token=token_banco)
+        # 💡 Ajuste preventivo: Se a URL começar com 'wss://', trocamos por 'https://'
+        # Isso evita o erro 505 'Invalid response status' no libsql-client
+        if url_banco.startswith("wss://"):
+            url_banco = url_banco.replace("wss://", "https://")
         
-        # O libsql-client sync já gerencia a conexão, mas se precisar rodar PRAGMAs:
-        cls.conn.execute("PRAGMA foreign_keys = ON") 
+        try:
+            # 2. Conecta no Turso usando a biblioteca atualizada
+            cls.conn = libsql.create_client_sync(url=url_banco, auth_token=token_banco)
+            
+            # Habilita chaves estrangeiras
+            cls.conn.execute("PRAGMA foreign_keys = ON") 
+        except Exception as e:
+            st.error(f"Erro crítico ao conectar no banco: {e}")
 
     @classmethod
     def fechar(cls):
         if cls.conn:
             cls.conn.close()
+            cls.conn = None
 
     @classmethod
     def execute(cls, sql, params=None):
-        # O libsql-client não usa cursor() da mesma forma que o sqlite3 padrão
-        # Ele permite executar direto da conexão
-        resultado = cls.conn.execute(sql, params or [])
-        return resultado
+        # Garante que a conexão esteja aberta se por acaso estiver fechada
+        if cls.conn is None:
+            cls.abrir()
+        
+        # O libsql-client executa direto da conexão e retorna um objeto ResultSet
+        return cls.conn.execute(sql, params or [])
 
     @classmethod
     def criar_tabelas(cls):
@@ -40,7 +50,7 @@ class database:
                 nome TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE, 
                 senha TEXT NOT NULL,
-                pontos INTEGER
+                pontos INTEGER DEFAULT 0
             );
         """)
 
@@ -53,7 +63,7 @@ class database:
                 data_hora DATETIME, 
                 gols_time_a INTEGER,
                 gols_time_b INTEGER,
-                finalizado BOOLEAN
+                finalizado BOOLEAN DEFAULT FALSE
             );
         """)
 
@@ -65,7 +75,7 @@ class database:
                 jogo_id INTEGER,    
                 gols_time_a INTEGER,
                 gols_time_b INTEGER,
-                pontos_ganhos INTEGER, 
+                pontos_ganhos INTEGER DEFAULT 0, 
                 FOREIGN KEY(usuario_id) REFERENCES usuario(id), 
                 FOREIGN KEY(jogo_id) REFERENCES jogos(id) 
             ); 
