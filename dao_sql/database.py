@@ -1,4 +1,3 @@
-import libsql_client
 import libsql_client as libsql
 import streamlit as st
 
@@ -7,12 +6,15 @@ class database:
     
     @classmethod
     def abrir(cls):
-        # 1. Pega as chaves de acesso que vamos esconder no Streamlit
+        # 1. Pega as chaves de acesso do Streamlit Secrets
         url_banco = st.secrets["TURSO_DATABASE_URL"]
         token_banco = st.secrets["TURSO_AUTH_TOKEN"]
         
-        # 2. Conecta no Turso usando as chaves!
-        cls.conn = libsql.connect(database=url_banco, auth_token=token_banco)
+        # 2. Conecta no Turso (Ajustado para a sintaxe correta do libsql-client)
+        # Usamos o sync para facilitar o uso com Streamlit
+        cls.conn = libsql.create_client_sync(url=url_banco, auth_token=token_banco)
+        
+        # O libsql-client sync já gerencia a conexão, mas se precisar rodar PRAGMAs:
         cls.conn.execute("PRAGMA foreign_keys = ON") 
 
     @classmethod
@@ -22,10 +24,10 @@ class database:
 
     @classmethod
     def execute(cls, sql, params=None):
-        cursor = cls.conn.cursor()
-        cursor.execute(sql, params or [])
-        cls.conn.commit()
-        return cursor
+        # O libsql-client não usa cursor() da mesma forma que o sqlite3 padrão
+        # Ele permite executar direto da conexão
+        resultado = cls.conn.execute(sql, params or [])
+        return resultado
 
     @classmethod
     def criar_tabelas(cls):
