@@ -1,4 +1,5 @@
 import libsql_client
+import libsql_client as libsql
 import streamlit as st
 
 class database:
