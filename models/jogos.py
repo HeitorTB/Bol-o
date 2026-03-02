@@ -1,3 +1,6 @@
+from dao_sql.DAO import DAO
+
+# A classe Jogo continua perfeita do jeito que você fez!
 class Jogo:
     # Quando cadastramos um jogo, ele começa com 0 gols e finalizado=False
     def __init__(self, id, time_a, time_b, data_hora, gols_time_a=0, gols_time_b=0, finalizado=False):
@@ -18,11 +21,10 @@ class Jogo:
     def get_gols_time_b(self): return self.__gols_time_b
     def get_finalizado(self): return self.__finalizado
 
-from dao_sql.DAO import DAO
 class JogoDAO(DAO):
     @classmethod
     def inserir(cls, obj):
-        cls.abrir()
+        # O abrir() e fechar() foram removidos. O execute() cuida disso!
         sql = """
             INSERT INTO jogos (time_a, time_b, data_hora, gols_time_a, gols_time_b, finalizado)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -35,22 +37,20 @@ class JogoDAO(DAO):
             obj.get_gols_time_b(), 
             obj.get_finalizado()
         ))
-        cls.fechar()
 
     @classmethod
     def listar(cls):
-        cls.abrir()
         sql = "SELECT id, time_a, time_b, data_hora, gols_time_a, gols_time_b, finalizado FROM jogos"
-        cursor = cls.execute(sql)
-        rows = cursor.fetchall()
-        # Cria a lista de objetos Jogo a partir do banco
-        objs = [Jogo(*row) for row in rows]
-        cls.fechar()
+        
+        # O execute retorna o resultado direto
+        resultado = cls.execute(sql)
+        
+        # 💡 AJUSTE: Usamos resultado.rows em vez de fetchall()
+        objs = [Jogo(*row) for row in resultado.rows]
         return objs
     
     @classmethod
     def atualizar(cls, obj):
-        cls.abrir()
         sql = """
             UPDATE jogos 
             SET time_a = ?, time_b = ?, data_hora = ?, 
@@ -66,4 +66,3 @@ class JogoDAO(DAO):
             obj.get_finalizado(), 
             obj.get_id() # O ID diz EXATAMENTE qual jogo estamos mudando
         ))
-        cls.fechar()

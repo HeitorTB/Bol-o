@@ -1,3 +1,5 @@
+from dao_sql.DAO import DAO
+
 class Usuario:
     def __init__(self, id, nome, email, senha, pontos):
         self.set_id(id)
@@ -28,58 +30,47 @@ class Usuario:
     def get_email(self): return self.__email
     def get_pontos(self): return self.__pontos
 
-from dao_sql.DAO import DAO
 class usuarioDAO(DAO):
     @classmethod
     def inserir(cls, obj):
-        cls.abrir()
         sql = """
             INSERT INTO usuario (nome, email, senha, pontos)
             VALUES (?, ?, ?, ?)
         """
         cls.execute(sql, (obj.get_nome(), obj.get_email(), obj.get_senha(), obj.get_pontos()))
-        cls.fechar()
 
     @classmethod
     def listar(cls):
-        cls.abrir()
         sql = "SELECT * FROM usuario"
-        cursor = cls.execute(sql)
-        rows = cursor.fetchall()
-        objs = [Usuario(id, nome, email, senha, pontos) for (id, nome, email, senha, pontos) in rows]
-        cls.fechar()
+        resultado = cls.execute(sql)
+        # Usamos resultado.rows para criar a lista de objetos
+        objs = [Usuario(*row) for row in resultado.rows]
         return objs
     
     @classmethod
     def listar_id(cls, id):
-        cls.abrir()
         sql = "SELECT * FROM usuario WHERE id = ?"
-        cursor = cls.execute(sql, (id,))
-        row = cursor.fetchone()
-        obj = Usuario(*row) if row else None
-        cls.fechar()
-        return obj
+        resultado = cls.execute(sql, (id,))
+        # Como não existe mais fetchone(), pegamos a primeira linha [0] se a lista não estiver vazia
+        if resultado.rows:
+            return Usuario(*resultado.rows[0])
+        return None
     
     @classmethod
     def atualizar(cls, obj):
-        cls.abrir()
         sql = """
             UPDATE usuario SET nome=?, email=?, senha=?, pontos=?
             WHERE id=?
         """
         cls.execute(sql, (obj.get_nome(), obj.get_email(), obj.get_senha(), obj.get_pontos(), obj.get_id()))
-        cls.fechar()
 
     @classmethod
     def excluir(cls, obj):
-        cls.abrir()
         sql = "DELETE FROM usuario WHERE id=?"
         cls.execute(sql, (obj.get_id(),))
-        cls.fechar()
     
     @classmethod
     def atualizar_todos_pontos(cls):
-        cls.abrir()
         sql = """
             UPDATE usuario
             SET pontos = (
@@ -89,4 +80,3 @@ class usuarioDAO(DAO):
             )
         """
         cls.execute(sql)
-        cls.fechar()
