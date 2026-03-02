@@ -1,46 +1,34 @@
 import libsql_client as libsql
 import streamlit as st
 
-# 🌟 1. A FUNÇÃO MÁGICA AGORA FICA DO LADO DE FORA DA CLASSE 🌟
-@st.cache_resource
-def get_conexao_turso():
-    url_banco = st.secrets["TURSO_DATABASE_URL"]
-    token_banco = st.secrets["TURSO_AUTH_TOKEN"]
-    
-    # Força o HTTPS para evitar o erro 505
-    if url_banco.startswith("libsql://"):
-        url_banco = url_banco.replace("libsql://", "https://")
-    elif url_banco.startswith("wss://"):
-        url_banco = url_banco.replace("wss://", "https://")
-    
-    try:
-        conn = libsql.create_client_sync(url=url_banco, auth_token=token_banco)
-        conn.execute("PRAGMA foreign_keys = ON") 
-        return conn
-    except Exception as e:
-        st.error(f"Erro crítico ao conectar no banco: {e}")
-        return None
-
-# 🌟 2. A SUA CLASSE FICA MUITO MAIS SIMPLES AGORA 🌟
 class database:
     
     @classmethod
     def abrir(cls):
-        # Mantemos a função vazia só para não dar erro no seu código antigo!
+        # 1. Deixamos vazio para neutralizar os 'abrir()' espalhados pelo seu sistema
         pass 
 
     @classmethod
     def fechar(cls):
-        # Também mantemos vazia, o Streamlit cuida disso sozinho agora.
+        # 2. Deixamos vazio para neutralizar os 'fechar()' espalhados pelo seu sistema
         pass 
 
     @classmethod
     def execute(cls, sql, params=None):
-        # Ele puxa a conexão global que o Streamlit guardou na memória
-        conn = get_conexao_turso()
-        if conn:
+        url_banco = st.secrets["TURSO_DATABASE_URL"]
+        token_banco = st.secrets["TURSO_AUTH_TOKEN"]
+        
+        # Força a usar o formato de link correto
+        if url_banco.startswith("libsql://"):
+            url_banco = url_banco.replace("libsql://", "https://")
+        elif url_banco.startswith("wss://"):
+            url_banco = url_banco.replace("wss://", "https://")
+            
+        # 🛡️ 3. A SOLUÇÃO DEFINITIVA: O bloco 'with'
+        # Ele abre a conexão, executa o SQL e GARANTE que ela seja fechada e devolvida
+        # para o sistema operacional instantaneamente, custe o que custar.
+        with libsql.create_client_sync(url=url_banco, auth_token=token_banco) as conn:
             return conn.execute(sql, params or [])
-        return None
 
     @classmethod
     def criar_tabelas(cls):
