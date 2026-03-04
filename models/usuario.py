@@ -50,8 +50,30 @@ class usuarioDAO(DAO):
     @classmethod
     def listar(cls):
         df = cls.listar_aba("usuario")
-        return [Usuario(row['id'], row['nome'], row['email'], row['senha'], row['pontos']) 
-                for _, row in df.iterrows()]
+        # Forçamos a conversão para os tipos corretos: str (texto) e int (número)
+        return [Usuario(
+            int(row['id']), 
+            str(row['nome']), 
+            str(row['email']), 
+            str(row['senha']), 
+            int(row['pontos'])
+        ) for _, row in df.iterrows()]
+
+    @classmethod
+    def listar_id(cls, id):
+        df = cls.listar_aba("usuario")
+        r = df[df['id'] == id]
+        if not r.empty:
+            row = r.iloc[0]
+            # Mesma coisa aqui, garantindo os formatos certos
+            return Usuario(
+                int(row['id']), 
+                str(row['nome']), 
+                str(row['email']), 
+                str(row['senha']), 
+                int(row['pontos'])
+            )
+        return None
 
     @classmethod
     def atualizar(cls, obj):
@@ -59,12 +81,3 @@ class usuarioDAO(DAO):
         df.loc[df['id'] == obj.get_id(), ['nome', 'email', 'senha', 'pontos']] = \
             [obj.get_nome(), obj.get_email(), obj.get_senha(), obj.get_pontos()]
         cls.salvar_aba("usuario", df)
-
-    @classmethod
-    def listar_id(cls, id):
-        df = cls.listar_aba("usuario")
-        row = df[df['id'] == id]
-        if not row.empty:
-            r = row.iloc[0]
-            return Usuario(r['id'], r['nome'], r['email'], r['senha'], r['pontos'])
-        return None
