@@ -42,7 +42,6 @@ class IndexUI:
 
     @staticmethod
     def main():
-        View.criar_admin()
         IndexUI.sidebar()
 
 if __name__ == "__main__":
