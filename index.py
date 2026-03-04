@@ -45,4 +45,6 @@ class IndexUI:
         View.criar_admin()
         IndexUI.sidebar()
 
-IndexUI.main()
+if __name__ == "__main__":
+    # View.criar_admin()  <-- COMENTE ESTA LINHA para testar
+    IndexUI.main()
