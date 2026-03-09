@@ -32,7 +32,7 @@ class IndexUI:
             orientation="horizontal"
         )
         if op == "Apostar": fazerApostasUI.main()
-        if op == "Minhas Apostas": MeusPalpitesUI.main()
+        if op == "Apostas": MeusPalpitesUI.main()
         if op == "Placar": VisualizarPlacarUI.main()
 
     @staticmethod
