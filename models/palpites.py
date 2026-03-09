@@ -36,6 +36,18 @@ class PalpiteDAO(DAO):
         cls.salvar_aba("palpites", df)
 
     @classmethod
+    def atualizar_pontos(cls, id_palpite, pontos):
+        # 1. Busca a tabela atual de palpites
+        df = cls.listar_aba("palpites")
+        
+        # 2. Localiza a linha correta pelo ID e atualiza a coluna de pontos
+        # Garantimos que os IDs sejam comparados como inteiros
+        df.loc[df['id'].astype(int) == int(id_palpite), 'pontos_ganhos'] = pontos
+        
+        # 3. Salva de volta na planilha
+        cls.salvar_aba("palpites", df)
+
+    @classmethod
     def listar_por_usuario(cls, id_usuario):
         df = cls.listar_aba("palpites")
         # Filtra as linhas onde usuario_id é igual ao id_usuario
