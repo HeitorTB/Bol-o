@@ -87,3 +87,31 @@ class View:
                     # p.__pontos_ganhos = pontos_calculados # (Opcional)
         
         return palpites
+    
+    @classmethod
+    def ranking_geral(cls):
+        usuarios = cls.usuario_listar()
+        # Puxa os palpites direto da DAO para somar
+        df_palpites = PalpiteDAO.listar_aba("palpites")
+        
+        if df_palpites.empty:
+            # Se não há palpites, todos têm 0 pontos
+            for u in usuarios: u.pontos_temp = 0
+            return usuarios
+
+        # Garante que os IDs e Pontos sejam números
+        df_palpites['usuario_id'] = df_palpites['usuario_id'].astype(int)
+        df_palpites['pontos_ganhos'] = df_palpites['pontos_ganhos'].astype(float)
+
+        # Soma os pontos agrupando por usuário
+        soma_pontos = df_palpites.groupby('usuario_id')['pontos_ganhos'].sum().to_dict()
+
+        lista_ranking = []
+        for u in usuarios:
+            if u.get_nome() != "admin":
+                # Atribui a soma ou 0 se não houver palpites para aquele ID
+                u.pontos_temp = int(soma_pontos.get(int(u.get_id()), 0))
+                lista_ranking.append(u)
+
+        # Ordena do maior para o menor
+        return sorted(lista_ranking, key=lambda x: x.pontos_temp, reverse=True)
