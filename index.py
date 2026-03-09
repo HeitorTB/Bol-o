@@ -27,7 +27,7 @@ class IndexUI:
     def menu_usuario():
         op = option_menu(
             menu_title=None,
-            options=["Apostar", "Minhas Apostas", "Placar"],
+            options=["Apostar", "Apostas", "Placar"],
             icons=["trophy", "card-checklist", "list-ol"],
             orientation="horizontal"
         )

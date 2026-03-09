@@ -5,7 +5,7 @@ from views import View
 class VisualizarPlacarUI:
     @classmethod
     def main(cls):
-        st.header("Ranking Geral (Placar) 🏆")
+        st.header("Ranking Geral 🏆")
         st.write("Acompanhe quem são os melhores palpiteiros do bolão!")
 
         # 1. Puxa todos os usuários do banco (já com os pontos calculados)
