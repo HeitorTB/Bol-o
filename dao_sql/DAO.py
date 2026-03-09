@@ -17,7 +17,7 @@ class DAO:
     def listar_aba(cls, nome_aba):
         conn = cls.get_conn()
         # O ttl=0 é importante para ler dados novos, mas o nome da aba deve ser exato
-        return conn.read(worksheet=nome_aba, ttl=0)
+        return conn.read(worksheet=nome_aba, ttl=10)
 
     @classmethod
     def salvar_aba(cls, nome_aba, df):
