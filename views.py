@@ -74,35 +74,54 @@ class View:
         return PalpiteDAO.listar_por_usuario(usuario_id)
     
     @classmethod
-    def processar_pontuacao_jogo(cls, jogo_id, gols_oficial_a, gols_oficial_b):
-        from models.palpites import PalpiteDAO
-        from models.usuario import usuarioDAO
+    def processar_pontuacao_jogo(cls, jogo_id, gols_a, gols_b):
+        # Busca todos os palpites desse jogo
+        palpites = PalpiteDAO.listar_por_jogo(jogo_id)
 
-        # Garante que o ID do jogo é um número inteiro (evita que o banco não ache as apostas)
-        id_jogo_int = int(jogo_id)
-        
-        # 1. Puxa todas as apostas que a galera fez para esse jogo
-        palpites = PalpiteDAO.listar_por_jogo(id_jogo_int)
-        
         for p in palpites:
             pontos = 0
+            # Palpite do usuário (p_)
+            pa = int(p.get_gols_time_a())
+            pb = int(p.get_gols_time_b())
             
-            # Força os gols a serem números inteiros (evita que '2' texto seja diferente de 2 número)
-            gols_p_a = int(p.get_gols_time_a())
-            gols_p_b = int(p.get_gols_time_b())
-            gols_of_a = int(gols_oficial_a)
-            gols_of_b = int(gols_oficial_b)
+            # Resultado real (r_)
+            ra = int(gols_a)
+            rb = int(gols_b)
 
-            # REGRAS DO JOGO:
-            if gols_p_a == gols_of_a and gols_p_b == gols_of_b:
-                pontos = 5 # Na mosca
+            # LÓGICA DE PONTUAÇÃO NÃO ACUMULATIVA (Prevalece a maior)
             
-            elif (gols_p_a > gols_p_b and gols_of_a > gols_of_b) or \
-                 (gols_p_a < gols_p_b and gols_of_a < gols_of_b) or \
-                 (gols_p_a == gols_p_b and gols_of_a == gols_of_b):
-                pontos = 3 # Acertou o vencedor/empate
+            # 1. Acertou placar cheio (12 pts)
+            if pa == ra and pb == rb:
+                pontos = 12
             
-            # 2. Salva os pontos daquela aposta
+            # 2. Acertou ganhador/perdedor + gols do ganhador (5 pts)
+            elif ((ra > rb and pa > pb and pa == ra) or 
+                  (rb > ra and pb > pa and pb == rb)):
+                pontos = 5
+            
+            # 3. Acertou ganhador/perdedor + gols do perdedor (4 pts)
+            elif ((ra > rb and pa > pb and pb == rb) or 
+                  (rb > ra and pb > pa and pa == ra)):
+                pontos = 4
+            
+            # 4. Acertou ganhador/perdedor ou empate, sem acertar gols (3 pts)
+            elif ((ra > rb and pa > pb) or 
+                  (rb > ra and pb > pa) or 
+                  (ra == rb and pa == pb)):
+                pontos = 3
+            
+            # 5. Acertou a somatória de gols (2 pts)
+            elif (pa + pb) == (ra + rb):
+                pontos = 2
+            
+            # 6. Acertou o gol de alguma das seleções (1 pt)
+            elif pa == ra or pb == rb:
+                pontos = 1
+            
+            else:
+                pontos = 0
+
+            # Salva o resultado final para este palpite
             PalpiteDAO.atualizar_pontos(p.get_id(), pontos)
 
         # 3. Pede pro DAO do Usuário recalcular a pontuação total
