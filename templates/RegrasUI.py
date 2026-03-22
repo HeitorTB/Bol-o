@@ -3,7 +3,7 @@ import streamlit as st
 class regrasUI:
     @classmethod
     def main(cls):
-        st.title("📜 Regras do Bolão")
+        st.title("Regras do Bolão")
         st.write("Confira abaixo todas as regras de pontuação, premiação e participação.")
 
         # --- SEÇÃO 1: PONTUAÇÃO ---
