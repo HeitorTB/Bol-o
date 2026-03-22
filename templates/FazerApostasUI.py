@@ -4,8 +4,26 @@ from views import View
 class fazerApostasUI:
     @classmethod
     def main(cls):
+        # --- CSS MÁGICO PARA O CELULAR ---
+        # Isso força as colunas do Streamlit a não quebrarem linha na tela pequena
+        st.markdown(
+            """
+            <style>
+            div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+            }
+            div[data-testid="stForm"] div[data-testid="column"] {
+                min-width: 0 !important;
+                padding: 0 3px !important; /* Deixa os itens mais juntinhos */
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.header("Faça seus Palpites 🎯")
-        st.warning("Se você sair ou atualizar a página sem clicar em salvar meus palpites e cadastrar todos eles, o progresso será perdido! ")
+        st.warning("Se você sair ou atualizar a página sem clicar em salvar meus palpites e cadastrar todos eles, o progresso será perdido!")
 
         # 1. Verifica quem é o usuário logado
         if "usuario_id" not in st.session_state:
@@ -34,24 +52,32 @@ class fazerApostasUI:
             palpites_digitados = {}
             for jogo in jogos_abertos:
                 
-                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 2], vertical_alignment="center")
+                # Ajustei as proporções para [3, 2, 1, 2, 3] para focar mais espaço nos nomes dos times
+                col1, col2, col3, col4, col5 = st.columns([3, 2, 1, 2, 3], vertical_alignment="center")
                 
                 with col1:
-                    st.subheader(jogo.get_time_a())
+                    # Time A alinhado à direita. O font-size: 16px garante que cabe no celular!
+                    st.markdown(f"<h5 style='text-align: right; margin: 0; font-size: 16px;'>{jogo.get_time_a()}</h5>", unsafe_allow_html=True)
+                
                 with col2:
-                    gols_a = st.number_input("", min_value=0, step=1, key=f"gols_a_{jogo.get_id()}")
+                    # label_visibility="collapsed" some com o título invisível e alinha a caixinha com o texto
+                    gols_a = st.number_input("A", min_value=0, step=1, key=f"gols_a_{jogo.get_id()}", label_visibility="collapsed")
+                
                 with col3:
-                    st.subheader("X")
+                    st.markdown("<h5 style='text-align: center; margin: 0; font-size: 16px;'>X</h5>", unsafe_allow_html=True)
+                
                 with col4:
-                    gols_b = st.number_input("", min_value=0, step=1, key=f"gols_b_{jogo.get_id()}")
+                    gols_b = st.number_input("B", min_value=0, step=1, key=f"gols_b_{jogo.get_id()}", label_visibility="collapsed")
+                
                 with col5:
-                    st.subheader(jogo.get_time_b())
+                    # Time B alinhado à esquerda.
+                    st.markdown(f"<h5 style='text-align: left; margin: 0; font-size: 16px;'>{jogo.get_time_b()}</h5>", unsafe_allow_html=True)
                 
                 st.divider()
                 palpites_digitados[jogo.get_id()] = {"gols_a": gols_a, "gols_b": gols_b}
 
-            # O botão de salvar
-            submit = st.form_submit_button("Salvar Meus Palpites")
+            # O botão de salvar (com use_container_width pra ficar esticado bonito)
+            submit = st.form_submit_button("Salvar Meus Palpites", use_container_width=True)
 
             if submit:
                 for jogo_id, placar in palpites_digitados.items():
