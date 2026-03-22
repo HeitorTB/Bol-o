@@ -34,10 +34,9 @@ class fazerApostasUI:
 
                 dados.append({
                     "ID": jogo.get_id(), # Vamos esconder essa coluna depois
-                    "Data/Hora": jogo.get_data_hora(),
                     "Casa": jogo.get_time_a(),
                     "Gols Casa": gols_a,
-                    "X": "X",
+                    "X": " X",
                     "Gols Visit": gols_b,
                     "Visitante": jogo.get_time_b()
                 })
