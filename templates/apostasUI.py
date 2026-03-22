@@ -13,7 +13,6 @@ class MeusPalpitesUI:
 
         usuario_id = st.session_state["usuario_id"]
 
-        # Busca as apostas do usuário e a lista de todos os jogos
         palpites = View.palpite_listar_por_usuario(usuario_id)
         todos_jogos = View.jogo_listar()
 
@@ -21,46 +20,56 @@ class MeusPalpitesUI:
             st.info("Você ainda não fez nenhum palpite. Vá na aba de apostas!")
             return
 
-        # Cria um "dicionário" de jogos para facilitar a busca do nome dos times pelo ID
         dic_jogos = {j.get_id(): j for j in todos_jogos}
 
-        # Vamos juntar os palpites com os jogos e ordenar pela data para ficar organizado
         palpites_com_jogo = []
         for p in palpites:
             jogo = dic_jogos.get(p.get_jogo_id())
             if jogo:
                 palpites_com_jogo.append((p, jogo))
         
-        # Ordena os jogos pela data (do mais antigo pro mais novo)
         palpites_com_jogo.sort(key=lambda x: x[1].get_data_hora())
 
-        # Exibe os Cards na tela
+        # Exibe os Cards na tela usando HTML/Flexbox para NUNCA quebrar a linha
         for p, jogo in palpites_com_jogo:
             with st.container(border=True):
-                # Status e Pontuação
+                
+                # Regras visuais de Status e Pontos (Estilo "Badge/Etiqueta")
                 if jogo.get_finalizado():
-                    status = "✅ Finalizado"
+                    status = "✅ Encerrado"
                     pontos = int(p.get_pontos_ganhos())
-                    cor_pontos = "#28a745" if pontos > 0 else "#6c757d" # Verde se ganhou algo, cinza se zerou
-                    pontos_html = f"<span style='color: {cor_pontos}; font-weight: bold;'>{pontos} pts</span>"
+                    cor_fundo = "#28a745" if pontos > 0 else "#6c757d" # Fundo verde se ganhou, cinza se zerou
+                    pontos_html = f"<span style='color: white; background-color: {cor_fundo}; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;'>{pontos} pts</span>"
                 else:
                     status = "⏳ Aberto"
-                    pontos_html = "<span style='color: #ffc107; font-weight: bold;'>- pts</span>"
+                    pontos_html = f"<span style='color: #856404; background-color: #fff3cd; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;'>Aguardando</span>"
 
-                # Linha 1 do Card: Data, Status e Pontos
-                col_topo1, col_topo2 = st.columns([3, 1], vertical_alignment="center")
-                with col_topo1:
-                    st.caption(f"📅 **{jogo.get_data_hora()}** | {status}")
-                with col_topo2:
-                    st.markdown(f"<div style='text-align: right; font-size: 18px;'>{pontos_html}</div>", unsafe_allow_html=True)
+                # Desenhando o Card inteiro em HTML para controle total no celular
+                card_html = f"""
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                        <span>📅 {jogo.get_data_hora()} • {status}</span>
+                        <span>{pontos_html}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; align-items: center; width: 100%; padding-top: 5px;">
+                        
+                        <div style="flex: 1; text-align: right; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {jogo.get_time_a()}
+                        </div>
+                        
+                        <div style="margin: 0 15px; background-color: #f0f2f6; color: #1f77b4; padding: 5px 15px; border-radius: 8px; font-size: 16px; font-weight: bold; white-space: nowrap;">
+                            {int(p.get_gols_time_a())} x {int(p.get_gols_time_b())}
+                        </div>
+                        
+                        <div style="flex: 1; text-align: left; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {jogo.get_time_b()}
+                        </div>
+                        
+                    </div>
+                </div>
+                """
                 
-                # Linha 2 do Card: O Placar Apostado (Layout 3-2-3 igual a tabela de jogos)
-                c1, c2, c3 = st.columns([3, 2, 3], vertical_alignment="center")
-                with c1:
-                    st.markdown(f"<h5 style='text-align: right; margin: 0;'>{jogo.get_time_a()}</h5>", unsafe_allow_html=True)
-                with c2:
-                    # O palpite do usuário centralizado e em destaque
-                    placar_palpite = f"{int(p.get_gols_time_a())} x {int(p.get_gols_time_b())}"
-                    st.markdown(f"<h4 style='text-align: center; margin: 0; color: #1f77b4; background-color: #f0f2f6; border-radius: 5px; padding: 5px;'>{placar_palpite}</h4>", unsafe_allow_html=True)
-                with c3:
-                    st.markdown(f"<h5 style='text-align: left; margin: 0;'>{jogo.get_time_b()}</h5>", unsafe_allow_html=True)
+                # Injeta o HTML no Streamlit
+                st.markdown(card_html, unsafe_allow_html=True)
