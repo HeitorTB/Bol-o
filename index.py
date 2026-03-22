@@ -29,7 +29,7 @@ class IndexUI:
         op = option_menu(
             menu_title=None,
             options=["Apostar", "Apostas", "Ranking","Regras"],
-            icons=["trophy", "card-checklist", "card-checklist", "info-circle"],
+            icons=["trophy", "card-checklist", "list-ol", "info-circle"],
             orientation="horizontal",
             styles={
                 # Força o menu a não jogar itens para baixo
@@ -45,7 +45,7 @@ class IndexUI:
         )
         if op == "Apostar": fazerApostasUI.main()
         if op == "Apostas": MeusPalpitesUI.main()
-        if op == "Placar": VisualizarPlacarUI.main()
+        if op == "Ranking": VisualizarPlacarUI.main()
         if op == "Regras": regrasUI.main()
 
     @staticmethod
