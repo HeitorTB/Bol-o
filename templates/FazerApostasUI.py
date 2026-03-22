@@ -30,7 +30,6 @@ class fazerApostasUI:
                 
                 dados.append({
                     "ID": jogo.get_id(),
-                    "Data/Hora": jogo.get_data_hora(),
                     "Casa": jogo.get_time_a(),
                     "Gols Casa": None, # Deixa vazio pois ele ainda não palpitou
                     "X": "X",
