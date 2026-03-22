@@ -7,6 +7,7 @@ from templates.apostasUI import MeusPalpitesUI
 from templates.FazerApostasUI import fazerApostasUI
 from templates.visualizarPlacarUI import VisualizarPlacarUI
 from streamlit_option_menu import option_menu
+from templates.RegrasUI import regrasUI
 from views import View
 
 class IndexUI: 
@@ -27,13 +28,14 @@ class IndexUI:
     def menu_usuario():
         op = option_menu(
             menu_title=None,
-            options=["Apostar", "Apostas", "Placar"],
+            options=["Apostar", "Apostas", "Placar","Regras"],
             icons=["trophy", "card-checklist", "list-ol"],
             orientation="horizontal"
         )
         if op == "Apostar": fazerApostasUI.main()
         if op == "Apostas": MeusPalpitesUI.main()
         if op == "Placar": VisualizarPlacarUI.main()
+        if op == "Regras": regrasUI.main()
 
     @staticmethod
     def menu_admin():
