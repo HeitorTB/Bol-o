@@ -8,6 +8,7 @@ from templates.FazerApostasUI import fazerApostasUI
 from templates.visualizarPlacarUI import VisualizarPlacarUI
 from streamlit_option_menu import option_menu
 from templates.RegrasUI import regrasUI
+from templates.ListarJogosUI import ListarJogosUI
 from views import View
 
 class IndexUI: 
@@ -28,8 +29,8 @@ class IndexUI:
     def menu_usuario():
         op = option_menu(
             menu_title=None,
-            options=["Apostar", "Apostas", "Ranking","Regras"],
-            icons=["trophy", "card-checklist", "list-ol", "info-circle"],
+            options=["Apostar", "Apostas", "Ranking", "Jogos","Regras"],
+            icons=["trophy", "card-checklist", "card-checklist", "list-ol", "info-circle"],
             orientation="horizontal",
             styles={
                 # Força o menu a não jogar itens para baixo
@@ -46,7 +47,9 @@ class IndexUI:
         if op == "Apostar": fazerApostasUI.main()
         if op == "Apostas": MeusPalpitesUI.main()
         if op == "Ranking": VisualizarPlacarUI.main()
+        if op == "Jogos": ListarJogosUI.main()
         if op == "Regras": regrasUI.main()
+        
 
     @staticmethod
     def menu_admin():
