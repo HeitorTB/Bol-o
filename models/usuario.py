@@ -1,6 +1,8 @@
 import pandas as pd
+from dao_sql.DAO import DAO
+
 class Usuario:
-    def __init__(self, id, nome, email, senha, pontos, status):
+    def __init__(self, id, nome, email, senha, pontos, status="Pendente"):
         self.set_id(id)
         self.set_nome(nome)
         self.set_email(email)
@@ -26,6 +28,7 @@ class Usuario:
         self.__pontos = valor
     def set_status(self, valor):
         self.__status = valor
+        
     def get_id(self): return self.__id
     def get_nome(self): return self.__nome
     def get_senha(self): return self.__senha
@@ -33,7 +36,6 @@ class Usuario:
     def get_pontos(self): return self.__pontos
     def get_status(self): return self.__status
 
-from dao_sql.DAO import DAO
 class usuarioDAO(DAO):
     @classmethod
     def inserir(cls, obj):
@@ -49,16 +51,27 @@ class usuarioDAO(DAO):
             "status": obj.get_status()
         }
         
-        df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+        # O Pandas mais novo prefere pd.concat para adicionar linhas
+        if df.empty:
+             df = pd.DataFrame([nova_linha])
+        else:
+             df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+             
         cls.salvar_aba("usuario", df)
 
     @classmethod
     def listar(cls):
         df = cls.listar_aba("usuario")
         
+        # BLINDAGEM: Se a coluna status não existir na planilha, ele cria ela com "Pendente"
+        if "status" not in df.columns:
+            df["status"] = "Pendente"
+            
+        # BLINDAGEM: Se a pessoa existir na planilha mas o status estiver em branco (NaN), coloca Pendente
+        df["status"] = df["status"].fillna("Pendente")
+
         usuarios = []
         for _, row in df.iterrows():
-            # Se o Pandas leu 1234.0, isso transforma de volta em "1234"
             senha_limpa = str(row['senha']).removesuffix('.0')
             
             usuarios.append(Usuario(
@@ -67,13 +80,19 @@ class usuarioDAO(DAO):
                 str(row['email']), 
                 senha_limpa, 
                 int(row['pontos']),
-                str(row['status'])
+                str(row['status']) # Agora é seguro ler
             ))
         return usuarios
 
     @classmethod
     def listar_id(cls, id):
         df = cls.listar_aba("usuario")
+        
+        # BLINDAGEM: Mesma coisa aqui, garante que a coluna existe
+        if "status" not in df.columns:
+            df["status"] = "Pendente"
+        df["status"] = df["status"].fillna("Pendente")
+        
         r = df[df['id'] == id]
         if not r.empty:
             row = r.iloc[0]
@@ -92,6 +111,12 @@ class usuarioDAO(DAO):
     @classmethod
     def atualizar(cls, obj):
         df = cls.listar_aba("usuario")
+        
+        # Se for atualizar, garante que a coluna existe no DF
+        if "status" not in df.columns:
+            df["status"] = "Pendente"
+            
         df.loc[df['id'] == obj.get_id(), ['nome', 'email', 'senha', 'pontos', 'status']] = \
             [obj.get_nome(), obj.get_email(), obj.get_senha(), obj.get_pontos(), obj.get_status()]
+            
         cls.salvar_aba("usuario", df)
