@@ -79,7 +79,7 @@ class usuarioDAO(DAO):
                 str(row['nome']), 
                 str(row['email']), 
                 senha_limpa, 
-                int(row['pontos']),
+                int(row.get('Pontos', 0)),
                 str(row['status']) # Agora é seguro ler
             ))
         return usuarios

@@ -16,6 +16,7 @@ class Palpite:
     def get_gols_time_a(self): return self.__gols_time_a
     def get_gols_time_b(self): return self.__gols_time_b
     def get_pontos_ganhos(self): return self.__pontos_ganhos
+    def set_pontos_ganhos(self, pontos): self.__pontos_ganhos = pontos
 
 class PalpiteDAO(DAO):
     @classmethod
@@ -23,13 +24,14 @@ class PalpiteDAO(DAO):
         df = cls.listar_aba("palpites")
         novo_id = int(df["id"].max() + 1) if not df.empty else 1
         
+        # Repare que TIRAMOS o "pontos_ganhos" daqui.
+        # Assim o Python não sobrescreve a fórmula da planilha!
         nova_linha = {
             "id": novo_id,
             "usuario_id": obj.get_usuario_id(),
             "jogo_id": obj.get_jogo_id(),
             "gols_time_a": obj.get_gols_time_a(),
-            "gols_time_b": obj.get_gols_time_b(),
-            "pontos_ganhos": obj.get_pontos_ganhos()
+            "gols_time_b": obj.get_gols_time_b()
         }
         
         df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
