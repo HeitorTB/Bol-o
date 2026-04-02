@@ -75,26 +75,34 @@ class usuarioDAO(DAO):
     def inserir(cls, obj):
         df = cls.listar_aba("usuario")
         
-        # BLINDAGEM PARA O ID: Remove linhas vazias antes de calcular o novo ID
+        # 1. Remove linhas vazias e calcula o novo ID
         if 'id' in df.columns:
             df = df.dropna(subset=['id'])
             
         novo_id = int(df["id"].max() + 1) if not df.empty else 1
         
+        # 2. Criamos a nova linha SEM a coluna de pontos
         nova_linha = {
             "id": novo_id,
             "nome": obj.get_nome(),
             "email": obj.get_email().lower(),
             "senha": obj.get_senha(),
-            #"pontos": obj.get_pontos(),
             "status": obj.get_status()
         }
         
-        if df.empty:
-             df = pd.DataFrame([nova_linha])
-        else:
-             df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+        # --- O PULO DO GATO ---
+        # Antes de concatenar, removemos as colunas de pontos do DataFrame lido.
+        # Assim, o Pandas não terá nenhuma coluna de pontos para salvar na planilha.
+        colunas_para_remover = ['pontos', 'Pontos', 'pontos_ganhos']
+        for col in colunas_para_remover:
+            if col in df.columns:
+                df = df.drop(columns=[col])
+        
+        # 3. Concatena apenas com as colunas básicas
+        df_nova = pd.DataFrame([nova_linha])
+        df = pd.concat([df, df_nova], ignore_index=True)
              
+        # 4. Salva. Como o DF não tem a coluna 'pontos', o Sheets preserva a fórmula que está lá.
         cls.salvar_aba("usuario", df)
 
     @classmethod
