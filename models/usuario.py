@@ -74,13 +74,11 @@ class usuarioDAO(DAO):
     def inserir(cls, obj):
         df = cls.listar_aba("usuario")
         
-        # 1. Remove linhas vazias e calcula o novo ID
         if 'id' in df.columns:
             df = df.dropna(subset=['id'])
             
         novo_id = int(df["id"].max() + 1) if not df.empty else 1
         
-        # 2. Criamos a nova linha SEM a coluna de pontos
         nova_linha = {
             "id": novo_id,
             "nome": obj.get_nome(),
@@ -89,19 +87,24 @@ class usuarioDAO(DAO):
             "status": obj.get_status()
         }
         
-        # --- O PULO DO GATO ---
-        # Antes de concatenar, removemos as colunas de pontos do DataFrame lido.
-        # Assim, o Pandas não terá nenhuma coluna de pontos para salvar na planilha.
-        colunas_para_remover = ['pontos', 'Pontos', 'pontos_ganhos']
-        for col in colunas_para_remover:
-            if col in df.columns:
-                df = df.drop(columns=[col])
-        
-        # 3. Concatena apenas com as colunas básicas
         df_nova = pd.DataFrame([nova_linha])
         df = pd.concat([df, df_nova], ignore_index=True)
-             
-        # 4. Salva. Como o DF não tem a coluna 'pontos', o Sheets preserva a fórmula que está lá.
+        
+        # --- O TRUQUE DO CABEÇALHO ---
+        formula = '={"pontos"; MAP(A2:A; LAMBDA(u_id; SE(u_id=""; ""; SOMASE(palpites!B:B; u_id; palpites!F:F))))}'
+        
+        # Transformamos o nome da coluna na própria fórmula
+        if 'pontos' in df.columns:
+            df = df.rename(columns={'pontos': formula})
+        elif 'Pontos' in df.columns:
+            df = df.rename(columns={'Pontos': formula})
+        else:
+            df[formula] = None
+            
+        # Transformamos todos os dados da coluna em nulo para que fiquem vazios na planilha.
+        # Isso é essencial para que a ArrayFormula possa expandir para baixo sem dar erro de #REF!
+        df[formula] = None
+        
         cls.salvar_aba("usuario", df)
 
     @classmethod
@@ -135,15 +138,19 @@ class usuarioDAO(DAO):
         if "status" not in df.columns:
             df["status"] = "Pendente"
             
-        # 1. Atualiza apenas os campos que o usuário pode editar (sem os pontos)
         df.loc[df['id'] == obj.get_id(), ['nome', 'email', 'senha', 'status']] = \
             [obj.get_nome(), obj.get_email(), obj.get_senha(), obj.get_status()]
             
-        # 2. O PULO DO GATO REPLICADO
-        # Removemos a coluna pontos para o Sheets manter a ArrayFormula intacta
-        colunas_para_remover = ['pontos', 'Pontos', 'pontos_ganhos']
-        for col in colunas_para_remover:
-            if col in df.columns:
-                df = df.drop(columns=[col])
+        # --- O TRUQUE DO CABEÇALHO REPLICADO ---
+        formula = '={"pontos"; MAP(A2:A; LAMBDA(u_id; SE(u_id=""; ""; SOMASE(palpites!B:B; u_id; palpites!F:F))))}'
+        
+        if 'pontos' in df.columns:
+            df = df.rename(columns={'pontos': formula})
+        elif 'Pontos' in df.columns:
+            df = df.rename(columns={'Pontos': formula})
+        else:
+            df[formula] = None
+            
+        df[formula] = None
                 
-        cls.salvar_aba("usuario", df)
+        cls.salvar_aba("usuario", df)   
