@@ -35,44 +35,44 @@ class PalpiteDAO(DAO):
         df_nova = pd.DataFrame([nova_linha])
         df = pd.concat([df, df_nova], ignore_index=True)
         
-        # --- O TRUQUE DO CABEÇALHO NA TABELA PALPITES ---
-        # Essa é a fórmula gigante que calcula as regras do bolão olhando pra aba "jogos"
+        # --- A SUPER FÓRMULA ---
         formula = '={"pontos_ganhos"; MAP(C2:C; D2:D; E2:E; LAMBDA(id_jogo; pa; pb; SE(id_jogo=""; ""; SEERRO(LET(id_num; id_jogo*1; pa_n; pa*1; pb_n; pb*1; ra; PROCV(id_num; jogos!A:G; 5; FALSO)*1; rb; PROCV(id_num; jogos!A:G; 6; FALSO)*1; final; PROCV(id_num; jogos!A:G; 7; FALSO); SE(OU(final=VERDADEIRO; final="TRUE"; final=1; final="1"); SES(E(pa_n=ra; pb_n=rb); 12; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pa_n=ra); E(rb>ra; pb_n=rb))); 5; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pb_n=rb); E(rb>ra; pa_n=ra))); 4; SINAL(pa_n-pb_n)=SINAL(ra-rb); 3; (pa_n+pb_n)=(ra+rb); 2; OU(pa_n=ra; pb_n=rb); 1; VERDADEIRO; 0); 0)); 0))))}'
         
-        # Renomeia a coluna para transformar ela na própria fórmula
-        if 'pontos_ganhos' in df.columns:
-            df = df.rename(columns={'pontos_ganhos': formula})
-            
-        # Limpa todas as linhas dessa coluna para a ARRAYFORMULA poder expandir e funcionar!
-        df[formula] = None
+        # Truque: Mantém apenas as 5 colunas base. Isso descarta qualquer coluna de pontos bugada ou vazia.
+        colunas_base = ["id", "usuario_id", "jogo_id", "gols_time_a", "gols_time_b"]
+        df = df[[c for c in colunas_base if c in df.columns]]
+        
+        # Cria a nova coluna com o nome da fórmula e preenche todas as linhas de baixo com Vazio ("")
+        # Isso garante o caminho livre para a ARRAYFORMULA expandir sem dar o erro #REF!
+        df[formula] = ""
         
         cls.salvar_aba("palpites", df)
 
     @classmethod
     def atualizar_pontos(cls, id_palpite, pontos):
-        # 1. Busca a tabela atual de palpites
-        df = cls.listar_aba("palpites")
-        
-        # 2. Localiza a linha correta pelo ID e atualiza a coluna de pontos
-        # Garantimos que os IDs sejam comparados como inteiros
-        df.loc[df['id'].astype(int) == int(id_palpite), 'pontos_ganhos'] = pontos
-        
-        # 3. Salva de volta na planilha
-        cls.salvar_aba("palpites", df)
+        # 🚨 FUNÇÃO DESATIVADA 🚨
+        # A planilha agora faz o cálculo sozinha! Se deixarmos o Python gravar 
+        # os pontos aqui, ele sobrescreve e destrói a fórmula gerando erros.
+        pass
 
     @classmethod
     def listar_por_usuario(cls, id_usuario):
         df = cls.listar_aba("palpites")
-        # Filtra as linhas onde usuario_id é igual ao id_usuario
         filtro = df[df['usuario_id'] == id_usuario]
+        
+        # O 'if' na última linha protege o código contra o KeyError caso o cache demore a carregar
         return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
-                        r['gols_time_a'], r['gols_time_b'], r['pontos_ganhos']) 
+                        r['gols_time_a'], r['gols_time_b'], 
+                        r['pontos_ganhos'] if 'pontos_ganhos' in r.index else 0) 
                 for _, r in filtro.iterrows()]
 
     @classmethod
     def listar_por_jogo(cls, id_jogo):
         df = cls.listar_aba("palpites")
         filtro = df[df['jogo_id'] == id_jogo]
+        
+        # Mesmo esquema de proteção contra o KeyError
         return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
-                        r['gols_time_a'], r['gols_time_b'], r['pontos_ganhos']) 
+                        r['gols_time_a'], r['gols_time_b'], 
+                        r['pontos_ganhos'] if 'pontos_ganhos' in r.index else 0) 
                 for _, r in filtro.iterrows()]
