@@ -24,8 +24,6 @@ class PalpiteDAO(DAO):
         df = cls.listar_aba("palpites")
         novo_id = int(df["id"].max() + 1) if not df.empty else 1
         
-        # Repare que TIRAMOS o "pontos_ganhos" daqui.
-        # Assim o Python não sobrescreve a fórmula da planilha!
         nova_linha = {
             "id": novo_id,
             "usuario_id": obj.get_usuario_id(),
@@ -34,7 +32,20 @@ class PalpiteDAO(DAO):
             "gols_time_b": obj.get_gols_time_b()
         }
         
-        df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+        df_nova = pd.DataFrame([nova_linha])
+        df = pd.concat([df, df_nova], ignore_index=True)
+        
+        # --- O TRUQUE DO CABEÇALHO NA TABELA PALPITES ---
+        # Essa é a fórmula gigante que calcula as regras do bolão olhando pra aba "jogos"
+        formula = '={"pontos_ganhos"; MAP(C2:C; D2:D; E2:E; LAMBDA(id_jogo; pa; pb; SE(id_jogo=""; ""; SEERRO(LET(ra; PROCV(id_jogo; jogos!A:G; 5; FALSO); rb; PROCV(id_jogo; jogos!A:G; 6; FALSO); final; PROCV(id_jogo; jogos!A:G; 7; FALSO); SE(OU(final=VERDADEIRO; final="TRUE"; final=1; final="1"); SES(E(pa=ra; pb=rb); 12; E(SINAL(pa-pb)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pa=ra); E(rb>ra; pb=rb))); 5; E(SINAL(pa-pb)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pb=rb); E(rb>ra; pa=ra))); 4; SINAL(pa-pb)=SINAL(ra-rb); 3; (pa+pb)=(ra+rb); 2; OU(pa=ra; pb=rb); 1; VERDADEIRO; 0); 0)); 0))))}'
+        
+        # Renomeia a coluna para transformar ela na própria fórmula
+        if 'pontos_ganhos' in df.columns:
+            df = df.rename(columns={'pontos_ganhos': formula})
+            
+        # Limpa todas as linhas dessa coluna para a ARRAYFORMULA poder expandir e funcionar!
+        df[formula] = None
+        
         cls.salvar_aba("palpites", df)
 
     @classmethod
