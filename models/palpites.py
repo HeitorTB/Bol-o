@@ -37,7 +37,7 @@ class PalpiteDAO(DAO):
         
         # --- O TRUQUE DO CABEÇALHO NA TABELA PALPITES ---
         # Essa é a fórmula gigante que calcula as regras do bolão olhando pra aba "jogos"
-        formula = '={"pontos_ganhos"; MAP(C2:C; D2:D; E2:E; LAMBDA(id_jogo; pa; pb; SE(id_jogo=""; ""; SEERRO(LET(ra; PROCV(id_jogo; jogos!A:G; 5; FALSO); rb; PROCV(id_jogo; jogos!A:G; 6; FALSO); final; PROCV(id_jogo; jogos!A:G; 7; FALSO); SE(OU(final=VERDADEIRO; final="TRUE"; final=1; final="1"); SES(E(pa=ra; pb=rb); 12; E(SINAL(pa-pb)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pa=ra); E(rb>ra; pb=rb))); 5; E(SINAL(pa-pb)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pb=rb); E(rb>ra; pa=ra))); 4; SINAL(pa-pb)=SINAL(ra-rb); 3; (pa+pb)=(ra+rb); 2; OU(pa=ra; pb=rb); 1; VERDADEIRO; 0); 0)); 0))))}'
+        formula = '={"pontos_ganhos"; MAP(C2:C; D2:D; E2:E; LAMBDA(id_jogo; pa; pb; SE(id_jogo=""; ""; SEERRO(LET(id_num; id_jogo*1; pa_n; pa*1; pb_n; pb*1; ra; PROCV(id_num; jogos!A:G; 5; FALSO)*1; rb; PROCV(id_num; jogos!A:G; 6; FALSO)*1; final; PROCV(id_num; jogos!A:G; 7; FALSO); SE(OU(final=VERDADEIRO; final="TRUE"; final=1; final="1"); SES(E(pa_n=ra; pb_n=rb); 12; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pa_n=ra); E(rb>ra; pb_n=rb))); 5; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pb_n=rb); E(rb>ra; pa_n=ra))); 4; SINAL(pa_n-pb_n)=SINAL(ra-rb); 3; (pa_n+pb_n)=(ra+rb); 2; OU(pa_n=ra; pb_n=rb); 1; VERDADEIRO; 0); 0)); 0))))}'
         
         # Renomeia a coluna para transformar ela na própria fórmula
         if 'pontos_ganhos' in df.columns:
