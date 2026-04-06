@@ -44,7 +44,7 @@ class PalpiteDAO(DAO):
         
         # Cria a nova coluna com o nome da fórmula e preenche todas as linhas de baixo com Vazio ("")
         # Isso garante o caminho livre para a ARRAYFORMULA expandir sem dar o erro #REF!
-        df[formula] = ""
+        df[formula] = None
         
         cls.salvar_aba("palpites", df)
 
@@ -60,10 +60,12 @@ class PalpiteDAO(DAO):
         df = cls.listar_aba("palpites")
         filtro = df[df['usuario_id'] == id_usuario]
         
-        # O 'if' na última linha protege o código contra o KeyError caso o cache demore a carregar
+        # BLINDAGEM: Acha a coluna que contém "pontos_ganhos" no nome, seja fórmula ou texto puro
+        col_pontos = next((c for c in df.columns if "pontos_ganhos" in str(c)), None)
+        
         return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
                         r['gols_time_a'], r['gols_time_b'], 
-                        r['pontos_ganhos'] if 'pontos_ganhos' in r.index else 0) 
+                        r[col_pontos] if col_pontos is not None else 0) # Usa a coluna dinâmica
                 for _, r in filtro.iterrows()]
 
     @classmethod
@@ -71,8 +73,10 @@ class PalpiteDAO(DAO):
         df = cls.listar_aba("palpites")
         filtro = df[df['jogo_id'] == id_jogo]
         
-        # Mesmo esquema de proteção contra o KeyError
+        # BLINDAGEM: Mesma lógica aqui
+        col_pontos = next((c for c in df.columns if "pontos_ganhos" in str(c)), None)
+        
         return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
                         r['gols_time_a'], r['gols_time_b'], 
-                        r['pontos_ganhos'] if 'pontos_ganhos' in r.index else 0) 
+                        r[col_pontos] if col_pontos is not None else 0) 
                 for _, r in filtro.iterrows()]
