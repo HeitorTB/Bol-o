@@ -1,7 +1,7 @@
 from dao_sql.DAO import DAO
 import pandas as pd
+
 class Palpite:
-    # Adicionamos o pontos_ganhos, que começa valendo 0
     def __init__(self, id, usuario_id, jogo_id, gols_time_a, gols_time_b, pontos_ganhos=0):
         self.__id = id
         self.__usuario_id = usuario_id
@@ -23,7 +23,7 @@ class PalpiteDAO(DAO):
     def inserir(cls, obj):
         df = cls.listar_aba("palpites")
         novo_id = int(df["id"].max() + 1) if not df.empty else 1
-        
+
         nova_linha = {
             "id": novo_id,
             "usuario_id": obj.get_usuario_id(),
@@ -31,52 +31,50 @@ class PalpiteDAO(DAO):
             "gols_time_a": obj.get_gols_time_a(),
             "gols_time_b": obj.get_gols_time_b()
         }
-        
+
         df_nova = pd.DataFrame([nova_linha])
         df = pd.concat([df, df_nova], ignore_index=True)
-        
-        # --- A SUPER FÓRMULA ---
-        formula = '={"pontos_ganhos"; MAP(C2:C; D2:D; E2:E; LAMBDA(id_jogo; pa; pb; SE(id_jogo=""; ""; SEERRO(LET(id_num; id_jogo*1; pa_n; pa*1; pb_n; pb*1; ra; PROCV(id_num; jogos!A:G; 5; FALSO)*1; rb; PROCV(id_num; jogos!A:G; 6; FALSO)*1; final; PROCV(id_num; jogos!A:G; 7; FALSO); SE(OU(final=VERDADEIRO; final="TRUE"; final=1; final="1"); SES(E(pa_n=ra; pb_n=rb); 12; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pa_n=ra); E(rb>ra; pb_n=rb))); 5; E(SINAL(pa_n-pb_n)=SINAL(ra-rb); ra<>rb; OU(E(ra>rb; pb_n=rb); E(rb>ra; pa_n=ra))); 4; SINAL(pa_n-pb_n)=SINAL(ra-rb); 3; (pa_n+pb_n)=(ra+rb); 2; OU(pa_n=ra; pb_n=rb); 1; VERDADEIRO; 0); 0)); 0))))}'
-        
-        # Truque: Mantém apenas as 5 colunas base. Isso descarta qualquer coluna de pontos bugada ou vazia.
+
+        # Mantém APENAS as colunas base (sem fórmulas)
         colunas_base = ["id", "usuario_id", "jogo_id", "gols_time_a", "gols_time_b"]
-        df = df[[c for c in colunas_base if c in df.columns]]
-        
-        # Cria a nova coluna com o nome da fórmula e preenche todas as linhas de baixo com Vazio ("")
-        # Isso garante o caminho livre para a ARRAYFORMULA expandir sem dar o erro #REF!
-        df[formula] = None
-        
+        # Se a coluna "pontos_ganhos" já existir, não a removemos (para preservar dados antigos)
+        # Mas não criamos fórmula nova. O Apps Script cuidará disso.
+        for col in df.columns:
+            if col not in colunas_base and col != "pontos_ganhos":
+                df = df.drop(columns=[col])
+
         cls.salvar_aba("palpites", df)
 
+    # Método opcional: se precisar forçar o cálculo via Python (caso o Apps Script falhe)
     @classmethod
     def atualizar_pontos(cls, id_palpite, pontos):
-        # 🚨 FUNÇÃO DESATIVADA 🚨
-        # A planilha agora faz o cálculo sozinha! Se deixarmos o Python gravar 
-        # os pontos aqui, ele sobrescreve e destrói a fórmula gerando erros.
-        pass
+        df = cls.listar_aba("palpites")
+        df.loc[df['id'] == id_palpite, 'pontos_ganhos'] = pontos
+        cls.salvar_aba("palpites", df)
 
     @classmethod
     def listar_por_usuario(cls, id_usuario):
         df = cls.listar_aba("palpites")
         filtro = df[df['usuario_id'] == id_usuario]
-        
-        # BLINDAGEM: Acha a coluna que contém "pontos_ganhos" no nome, seja fórmula ou texto puro
-        col_pontos = next((c for c in df.columns if "pontos_ganhos" in str(c)), None)
-        
-        return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
-                        r['gols_time_a'], r['gols_time_b'], 
-                        r[col_pontos] if col_pontos is not None else 0) # Usa a coluna dinâmica
+
+        # Garante que a coluna "pontos_ganhos" existe (se não, cria com 0)
+        if 'pontos_ganhos' not in df.columns:
+            df['pontos_ganhos'] = 0
+
+        return [Palpite(r['id'], r['usuario_id'], r['jogo_id'],
+                        r['gols_time_a'], r['gols_time_b'],
+                        r['pontos_ganhos'] if pd.notna(r['pontos_ganhos']) else 0)
                 for _, r in filtro.iterrows()]
 
     @classmethod
     def listar_por_jogo(cls, id_jogo):
         df = cls.listar_aba("palpites")
         filtro = df[df['jogo_id'] == id_jogo]
-        
-        # BLINDAGEM: Mesma lógica aqui
-        col_pontos = next((c for c in df.columns if "pontos_ganhos" in str(c)), None)
-        
-        return [Palpite(r['id'], r['usuario_id'], r['jogo_id'], 
-                        r['gols_time_a'], r['gols_time_b'], 
-                        r[col_pontos] if col_pontos is not None else 0) 
+
+        if 'pontos_ganhos' not in df.columns:
+            df['pontos_ganhos'] = 0
+
+        return [Palpite(r['id'], r['usuario_id'], r['jogo_id'],
+                        r['gols_time_a'], r['gols_time_b'],
+                        r['pontos_ganhos'] if pd.notna(r['pontos_ganhos']) else 0)
                 for _, r in filtro.iterrows()]
