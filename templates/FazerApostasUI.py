@@ -12,7 +12,7 @@ class fazerApostasUI:
         st.markdown("""
             <style>
             [data-testid="stForm"] {
-                max-width: 450px; /* Altere esse número para deixar mais largo ou mais fino */
+                max-width: 550px; /* Altere esse número para deixar mais largo ou mais fino */
                 margin: 0 auto;   /* Centraliza o bloco na tela */
             }
             </style>
