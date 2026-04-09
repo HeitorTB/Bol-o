@@ -77,9 +77,9 @@ class MeusPalpitesUI:
                 
                 # Cabeçalho: Status
                 if finalizado:
-                    st.caption("🔴 Finalizado")
+                    st.caption("Finalizado")
                 else:
-                    st.caption("🟢 Em Aberto")
+                    st.caption("Em Aberto")
                 
                 # Meio: Times e O Seu Palpite
                 col1, col2, col3 = st.columns([3, 2, 3])
@@ -105,4 +105,4 @@ class MeusPalpitesUI:
                     st.markdown(f"<div style='text-align: center; font-size: 14px;'>Placar Oficial: <b>{oficial_gols_a} x {oficial_gols_b}</b></div>", unsafe_allow_html=True)
                     st.markdown(f"<div style='text-align: center; color: #28a745; font-size: 14px;'><b>Pontos: {pontos}</b></div>", unsafe_allow_html=True)
                 else:
-                    st.markdown("<div style='text-align: center; font-size: 13px; color: gray;'>⏳ Aguardando resultado...</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='text-align: center; font-size: 13px; color: gray;'>Aguardando resultado...</div>", unsafe_allow_html=True)
