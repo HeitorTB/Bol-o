@@ -23,7 +23,7 @@ class fazerApostasUI:
         """, unsafe_allow_html=True)
         # ---------------------------------------------
 
-        st.info("Ajuste os placares usando os botões de + e - nos cards abaixo!")
+        st.info("Ajuste os placares usando os botões nos cards abaixo!")
 
         if "usuario_id" not in st.session_state:
             st.error("Você precisa estar logado!")

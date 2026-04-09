@@ -39,7 +39,5 @@ class regrasUI:
         st.header("🤝 Sobre a Participação")
         st.markdown("""
         1. O valor para a participação é **R$ 25,00**.
-        2. O valor deve ser pago até o dia **dd/mm/aaaa** *(⚠️ Lembrete: ajuste essa data no código!)*, antes do primeiro jogo.
-        3. Os palpites são recolhidos online através de um formulário. Em até 48h você receberá o link para acompanhar as pontuações e uma cópia da sua tabela de palpites caso queira imprimir.
-        4. O formulário de palpites estará disponível até o dia **10/06/2026**, antes do primeiro jogo.
+        2. O formulário de palpites estará disponível até o dia **10/06/2026**, antes do primeiro jogo.
         """)
