@@ -86,18 +86,28 @@ class fazerApostasUI:
 
             submit = st.form_submit_button("Salvar Meus Palpites", type="primary", use_container_width=True)
 
+        # 5. Lógica de Salvamento
         if submit:
-            salvos = 0
+            palpites_lote = [] # Criamos uma lista vazia
+            
             for jogo in jogos_disponiveis:
                 gols_a = st.session_state.get(f"gols_a_{jogo.get_id()}")
                 gols_b = st.session_state.get(f"gols_b_{jogo.get_id()}")
 
                 if gols_a is not None and gols_b is not None:
-                    View.palpite_inserir(usuario_id, jogo.get_id(), int(gols_a), int(gols_b))
-                    salvos += 1
+                    # Em vez de salvar no banco, guardamos na lista
+                    palpites_lote.append({
+                        "id_usuario": usuario_id,
+                        "id_jogo": jogo.get_id(),
+                        "gols_a": int(gols_a),
+                        "gols_b": int(gols_b)
+                    })
             
-            if salvos > 0:
-                st.success(f"{salvos} palpite(s) salvos com sucesso!")
+            # Se a lista tiver itens, chamamos a nova função de lote UMA única vez
+            if len(palpites_lote) > 0:
+                View.palpite_inserir_lote(palpites_lote) # <-- Nova função!
+                
+                st.success(f"{len(palpites_lote)} palpite(s) salvos com sucesso!")
                 st.session_state.salvou_apostas = True
                 st.rerun()
 

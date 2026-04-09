@@ -85,3 +85,9 @@ class View:
 
         # Retorna ordenado do maior para o menor
         return sorted(lista_ranking, key=lambda x: x.pontos_temp, reverse=True)
+    
+    @classmethod
+    def palpite_inserir_lote(cls, lista_palpites_dicts):
+        # Transforma os dicionários em objetos Palpite (se a sua arquitetura exigir)
+        # ou passa a lista direto para o DAO
+        PalpiteDAO.inserir_lote(lista_palpites_dicts)

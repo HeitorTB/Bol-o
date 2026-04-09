@@ -35,17 +35,51 @@ class PalpiteDAO(DAO):
         df_nova = pd.DataFrame([nova_linha])
         df = pd.concat([df, df_nova], ignore_index=True)
 
-        # Mantém APENAS as colunas base (sem fórmulas)
         colunas_base = ["id", "usuario_id", "jogo_id", "gols_time_a", "gols_time_b"]
-        # Se a coluna "pontos_ganhos" já existir, não a removemos (para preservar dados antigos)
-        # Mas não criamos fórmula nova. O Apps Script cuidará disso.
         for col in df.columns:
             if col not in colunas_base and col != "pontos_ganhos":
                 df = df.drop(columns=[col])
 
         cls.salvar_aba("palpites", df)
 
-    # Método opcional: se precisar forçar o cálculo via Python (caso o Apps Script falhe)
+    # ==========================================
+    # NOVO MÉTODO: INSERIR EM LOTE
+    # ==========================================
+    @classmethod
+    def inserir_lote(cls, lista_dicts):
+        # 1. Lê a planilha atual
+        df = cls.listar_aba("palpites")
+        
+        # 2. Descobre qual será o ID do primeiro novo palpite
+        novo_id = int(df["id"].max() + 1) if not df.empty else 1
+
+        novas_linhas = []
+        for item in lista_dicts:
+            novas_linhas.append({
+                "id": novo_id,
+                # Usamos o .get() com duas opções para garantir que vai ler os dados 
+                # independente de como você nomeou as chaves no dicionário da View
+                "usuario_id": item.get("usuario_id", item.get("id_usuario")),
+                "jogo_id": item.get("jogo_id", item.get("id_jogo")),
+                "gols_time_a": item.get("gols_time_a", item.get("gols_a")),
+                "gols_time_b": item.get("gols_time_b", item.get("gols_b"))
+            })
+            novo_id += 1 # Prepara o ID para o próximo palpite do loop
+
+        # 3. Transforma a lista em DataFrame e junta com o antigo
+        df_novas = pd.DataFrame(novas_linhas)
+        df = pd.concat([df, df_novas], ignore_index=True)
+
+        # 4. Limpeza das colunas (mesma lógica do inserir normal)
+        colunas_base = ["id", "usuario_id", "jogo_id", "gols_time_a", "gols_time_b"]
+        for col in df.columns:
+            if col not in colunas_base and col != "pontos_ganhos":
+                df = df.drop(columns=[col])
+
+        # 5. Salva tudo de uma vez só!
+        cls.salvar_aba("palpites", df)
+    # ==========================================
+
     @classmethod
     def atualizar_pontos(cls, id_palpite, pontos):
         df = cls.listar_aba("palpites")
@@ -57,7 +91,6 @@ class PalpiteDAO(DAO):
         df = cls.listar_aba("palpites")
         filtro = df[df['usuario_id'] == id_usuario]
 
-        # Garante que a coluna "pontos_ganhos" existe (se não, cria com 0)
         if 'pontos_ganhos' not in df.columns:
             df['pontos_ganhos'] = 0
 
