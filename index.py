@@ -1,8 +1,6 @@
 import streamlit as st
 from templates.loginUI import LoginUI
 from templates.abrirContaUI import AbrirContaUI
-from templates.CadastrarJogosUI import cadastrarJogoUI
-from templates.atualizarPlacarUI import AtualizarPlacarUI
 from templates.apostasUI import MeusPalpitesUI
 from templates.FazerApostasUI import fazerApostasUI
 from templates.visualizarPlacarUI import VisualizarPlacarUI
@@ -45,17 +43,6 @@ class IndexUI:
         if op == "Apostas": MeusPalpitesUI.main()
         if op == "Ranking": VisualizarPlacarUI.main()
         if op == "Regras": regrasUI.main()
-
-    @staticmethod
-    def menu_admin():
-        op = option_menu(
-            menu_title=None,
-            options=["Cadastrar", "Atualizar"],
-            icons=["plus-circle", "arrow-clockwise"],
-            orientation="horizontal"
-        )
-        if op == "Cadastrar": cadastrarJogoUI.main() 
-        if op == "Atualizar": AtualizarPlacarUI.main() 
     
     @staticmethod
     def sidebar():
