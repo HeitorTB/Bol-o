@@ -99,7 +99,7 @@ class fazerApostasUI:
     @classmethod
     def criar_card_jogo(cls, jogo):
         with st.container(border=True):
-            st.markdown(f"<h5 style='text-align: center; color: gray;'>Jogo #{jogo.get_id()}</h5>", unsafe_allow_html=True)
+            st.markdown(f"<h5 style='text-align: center; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
             
             col_a, col_x, col_b = st.columns([2, 1, 2])
             
