@@ -7,17 +7,31 @@ class fazerApostasUI:
     def main(cls):
         st.header("Faça seus Palpites 🎯")
         
-        # --- CSS PARA DEIXAR OS CARDS MENOS LARGOS ---
-        # Limita a largura do formulário e centraliza na tela
+        # --- CSS AGRESSIVO PARA FORÇAR MESMA LINHA NO MOBILE ---
         st.markdown("""
             <style>
+            /* Limita a largura geral do formulário no computador */
             [data-testid="stForm"] {
-                max-width: 700px; /* Altere esse número para deixar mais largo ou mais fino */
-                margin: 0 auto;   /* Centraliza o bloco na tela */
+                max-width: 500px; 
+                margin: 0 auto;   
+            }
+            
+            /* Força as colunas internas a ficarem lado a lado no celular */
+            @media (max-width: 640px) {
+                [data-testid="column"] {
+                    width: auto !important;
+                    flex: 1 1 0% !important;
+                    min-width: 0 !important;
+                }
+                [data-testid="stHorizontalBlock"] {
+                    flex-wrap: nowrap !important;
+                    flex-direction: row !important;
+                    align-items: center !important;
+                }
             }
             </style>
         """, unsafe_allow_html=True)
-        # ---------------------------------------------
+        # --------------------------------------------------------
 
         st.info("Ajuste os placares usando os botões de + e - nos cards abaixo!")
 
@@ -95,25 +109,37 @@ class fazerApostasUI:
     @classmethod
     def criar_card_jogo(cls, jogo):
         with st.container(border=True):
-            st.markdown(f"<h5 style='text-align: center; color: gray;'>Jogo #{jogo.get_id()}</h5>", unsafe_allow_html=True)
+            # Título do jogo centralizado
+            st.markdown(f"<p style='text-align: center; color: gray; margin-bottom: 0px;'>Jogo #{jogo.get_id()}</p>", unsafe_allow_html=True)
             
-            col_a, col_x, col_b = st.columns([2, 1, 2])
+            # Nomes dos times em destaque, na mesma linha (Ex: Flamengo  X  Vasco)
+            st.markdown(
+                f"<h4 style='text-align: center; margin-top: 5px; margin-bottom: 15px;'>"
+                f"{jogo.get_time_a()} <span style='color: gray; font-size: 18px;'>&nbsp; X &nbsp;</span> {jogo.get_time_b()}"
+                f"</h4>", 
+                unsafe_allow_html=True
+            )
+            
+            # Colunas apenas para os campos numéricos. 
+            # Demos mais espaço para os botões e menos espaço para o meio.
+            col_a, col_x, col_b = st.columns([3, 1, 3])
             
             with col_a:
-                # Mudamos value=None para value=0
                 st.number_input(
-                    f"{jogo.get_time_a()}", 
+                    "Gols A", # O nome é obrigatório, mas não vai aparecer na tela
                     min_value=0, max_value=20, step=1, value=0, 
-                    key=f"gols_a_{jogo.get_id()}"
+                    key=f"gols_a_{jogo.get_id()}",
+                    label_visibility="collapsed" # ISSO É A MÁGICA: Esconde o texto
                 )
                 
             with col_x:
-                st.markdown("<h4 style='text-align: center; margin-top: 35px;'>X</h4>", unsafe_allow_html=True)
+                # Apenas um pequeno traço ou nada, já que o "X" já está lá em cima
+                st.markdown("<p style='text-align: center; margin-top: 10px;'>-</p>", unsafe_allow_html=True)
                 
             with col_b:
-                # Mudamos value=None para value=0
                 st.number_input(
-                    f"{jogo.get_time_b()}", 
+                    "Gols B", 
                     min_value=0, max_value=20, step=1, value=0, 
-                    key=f"gols_b_{jogo.get_id()}"
+                    key=f"gols_b_{jogo.get_id()}",
+                    label_visibility="collapsed" # Esconde o texto
                 )
