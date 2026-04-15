@@ -71,10 +71,10 @@ class IndexUI:
                         ### Quase lá! 🚀
                         Para liberar o seu acesso às áreas de **Palpites** e **Ranking**, você precisa realizar o pagamento da taxa de inscrição do bolão.
                         
-                        * **Valor:** R$ 25,00  
-                        * **Chave PIX:** `seu-email-ou-telefone@pix.com.br`
+                        * **Valor:** R$ 30,00  
+                        * **Chave PIX:** `(84)98741-2205`
                         
-                        Após realizar o pagamento, envie o comprovante no WhatsApp do Administrador: **(11) 99999-9999**.
+                        Após realizar o pagamento, envie o comprovante no WhatsApp do Administrador: **(84)98741-2205**.
                         """)
                     
                     if st.button("Já paguei e fui aprovado! Atualizar acesso", type="primary", use_container_width=True):

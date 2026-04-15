@@ -38,6 +38,6 @@ class regrasUI:
         # --- SEÇÃO 3: PARTICIPAÇÃO ---
         st.header("🤝 Sobre a Participação")
         st.markdown("""
-        1. O valor para a participação é **R$ 25,00**.
+        1. O valor para a participação é **R$ 30,00**.
         2. O formulário de palpites estará disponível até o dia **10/06/2026**, antes do primeiro jogo.
         """)
