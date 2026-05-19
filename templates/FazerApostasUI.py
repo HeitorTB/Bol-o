@@ -24,22 +24,18 @@ class fazerApostasUI:
     def main(cls):
         st.header("Faça seus Palpites 🎯")
         
-        # --- CSS PARA DEIXAR OS CARDS MENOS LARGOS ---
+        # --- CSS AJUSTADO PARA O LAYOUT SEM FORM ---
         st.markdown("""
             <style>
-            [data-testid="stForm"] {
-                max-width: 800px; 
-                margin: 0 auto;  
-            }    
-            @media (max-width: 640px) {   
-                max-width: 450px;
+            .block-container {
+                max-width: 900px;
                 margin: 0 auto;
-            }   
+            }
             </style>
         """, unsafe_allow_html=True)
         # ---------------------------------------------
 
-        st.info("Ative o interruptor do card para liberar o palpite e use os botões + e - !")
+        st.info("Ative o interruptor de um jogo para liberar os botões de + e - e palpitar!")
 
         if "usuario_id" not in st.session_state:
             st.error("Você precisa estar logado!")
@@ -68,28 +64,28 @@ class fazerApostasUI:
             st.success("Você já palpitou em todos os jogos disponíveis! 🎉 Vá para a aba 'Meus Palpites' para conferir.")
             return
 
-        with st.form("form_palpites"):
+        # Renderização dos cards diretamente na tela (sem st.form)
+        for i in range(0, len(jogos_disponiveis), 2):
+            cols = st.columns(2)
             
-            for i in range(0, len(jogos_disponiveis), 2):
-                cols = st.columns(2)
-                
-                with cols[0]:
-                    jogo1 = jogos_disponiveis[i]
-                    cls.criar_card_jogo(jogo1)
-                
-                if i + 1 < len(jogos_disponiveis):
-                    with cols[1]:
-                        jogo2 = jogos_disponiveis[i+1]
-                        cls.criar_card_jogo(jogo2)
+            with cols[0]:
+                jogo1 = jogos_disponiveis[i]
+                cls.criar_card_jogo(jogo1)
+            
+            if i + 1 < len(jogos_disponiveis):
+                with cols[1]:
+                    jogo2 = jogos_disponiveis[i+1]
+                    cls.criar_card_jogo(jogo2)
 
-            submit = st.form_submit_button("Salvar Meus Palpites", type="primary", use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        # Botão de salvar comum que processa as informações instantaneamente
+        submit = st.button("Salvar Meus Palpites", type="primary", use_container_width=True)
 
-        # 5. Lógica de Salvamento
+        # Lógica de Salvamento
         if submit:
             palpites_lote = []
             
             for jogo in jogos_disponiveis:
-                # AJUSTE AQUI: Só coletamos o palpite se o usuário ativou o Toggle do jogo
                 ativado = st.session_state.get(f"ativar_{jogo.get_id()}")
                 
                 if ativado:
@@ -117,13 +113,12 @@ class fazerApostasUI:
     def criar_card_jogo(cls, jogo):
         with st.container(border=True):
             
-            # Criamos uma linha com o número do jogo e o interruptor de ativação ao lado
             col_titulo, col_toggle = st.columns([2, 1])
             with col_titulo:
                 st.markdown(f"<h5 style='margin-top: 5px; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
             with col_toggle:
-                # O Toggle que valida se o usuário quer mesmo votar nesse jogo
-                st.toggle("Palpitar", key=f"ativar_{jogo.get_id()}")
+                # Captura o estado do interruptor na variável 'ativado'
+                ativado = st.toggle("Palpitar", key=f"ativar_{jogo.get_id()}")
             
             # --- BUSCA AS SIGLAS PARA AS BANDEIRAS ---
             sigla_a = SIGLAS_PAISES.get(jogo.get_time_a(), "xx")
@@ -137,12 +132,13 @@ class fazerApostasUI:
             
             with col_a:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
-                # AJUSTE: Mudado value para 0, agora os botões + e - funcionam perfeitamente!
+                # O parâmetro disabled=not ativado faz a mágica acontecer
                 st.number_input(
                     "Gols A", 
                     min_value=0, max_value=20, step=1, value=0,
                     key=f"gols_a_{jogo.get_id()}",
-                    label_visibility="collapsed"
+                    label_visibility="collapsed",
+                    disabled=not ativado
                 )
                 
             with col_x:
@@ -150,10 +146,11 @@ class fazerApostasUI:
                 
             with col_b:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
-                # AJUSTE: Mudado value para 0, agora os botões + e - funcionam perfeitamente!
+                # O parâmetro disabled=not ativado faz a mágica acontecer
                 st.number_input(
                     "Gols B", 
                     min_value=0, max_value=20, step=1, value=0,
                     key=f"gols_b_{jogo.get_id()}",
-                    label_visibility="collapsed"
+                    label_visibility="collapsed",
+                    disabled=not ativado
                 )
