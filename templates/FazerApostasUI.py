@@ -39,7 +39,7 @@ class fazerApostasUI:
         """, unsafe_allow_html=True)
         # ---------------------------------------------
 
-        st.info("Ajuste os placares usando os botões nos cards abaixo!")
+        st.info("Ative o interruptor do card para liberar o palpite e use os botões + e - !")
 
         if "usuario_id" not in st.session_state:
             st.error("Você precisa estar logado!")
@@ -86,14 +86,16 @@ class fazerApostasUI:
 
         # 5. Lógica de Salvamento
         if submit:
-            palpites_lote = [] # Criamos uma lista vazia
+            palpites_lote = []
             
             for jogo in jogos_disponiveis:
-                gols_a = st.session_state.get(f"gols_a_{jogo.get_id()}")
-                gols_b = st.session_state.get(f"gols_b_{jogo.get_id()}")
+                # AJUSTE AQUI: Só coletamos o palpite se o usuário ativou o Toggle do jogo
+                ativado = st.session_state.get(f"ativar_{jogo.get_id()}")
+                
+                if ativado:
+                    gols_a = st.session_state.get(f"gols_a_{jogo.get_id()}")
+                    gols_b = st.session_state.get(f"gols_b_{jogo.get_id()}")
 
-                if gols_a is not None and gols_b is not None:
-                    # Em vez de salvar no banco, guardamos na lista
                     palpites_lote.append({
                         "id_usuario": usuario_id,
                         "id_jogo": jogo.get_id(),
@@ -101,22 +103,27 @@ class fazerApostasUI:
                         "gols_b": int(gols_b)
                     })
             
-            # Se a lista tiver itens, chamamos a nova função de lote UMA única vez
             if len(palpites_lote) > 0:
-                View.palpite_inserir_lote(palpites_lote) # <-- Nova função!
+                View.palpite_inserir_lote(palpites_lote)
                 
                 st.session_state.salvou_apostas = True
-                st.cache_data.clear() # Limpamos o cache aqui!
+                st.cache_data.clear() 
                 st.rerun()
-
             else:
-                st.warning("Você precisa preencher o placar completo de pelo menos um jogo para salvar!")
+                st.warning("Você precisa ativar o interruptor de pelo menos um jogo para salvar seus palpites!")
 
 
     @classmethod
     def criar_card_jogo(cls, jogo):
         with st.container(border=True):
-            st.markdown(f"<h5 style='text-align: center; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
+            
+            # Criamos uma linha com o número do jogo e o interruptor de ativação ao lado
+            col_titulo, col_toggle = st.columns([2, 1])
+            with col_titulo:
+                st.markdown(f"<h5 style='margin-top: 5px; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
+            with col_toggle:
+                # O Toggle que valida se o usuário quer mesmo votar nesse jogo
+                st.toggle("Palpitar", key=f"ativar_{jogo.get_id()}")
             
             # --- BUSCA AS SIGLAS PARA AS BANDEIRAS ---
             sigla_a = SIGLAS_PAISES.get(jogo.get_time_a(), "xx")
@@ -129,24 +136,24 @@ class fazerApostasUI:
             col_a, col_x, col_b = st.columns([2, 1, 2])
             
             with col_a:
-                # O nome do time e a bandeira ficam soltos em cima do campo de número
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
+                # AJUSTE: Mudado value para 0, agora os botões + e - funcionam perfeitamente!
                 st.number_input(
-                    "Gols A", # Esse nome agora é invisível para o usuário
-                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
+                    "Gols A", 
+                    min_value=0, max_value=20, step=1, value=0,
                     key=f"gols_a_{jogo.get_id()}",
-                    label_visibility="collapsed" # Mágica para esconder o rótulo
+                    label_visibility="collapsed"
                 )
                 
             with col_x:
-                # Ajustamos o margin-top para 25px para alinhar o X com o campo numérico
                 st.markdown("<h4 style='text-align: center; margin-top: 25px;'>X</h4>", unsafe_allow_html=True)
                 
             with col_b:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
+                # AJUSTE: Mudado value para 0, agora os botões + e - funcionam perfeitamente!
                 st.number_input(
                     "Gols B", 
-                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
+                    min_value=0, max_value=20, step=1, value=0,
                     key=f"gols_b_{jogo.get_id()}",
                     label_visibility="collapsed"
                 )
