@@ -51,10 +51,8 @@ class fazerApostasUI:
             st.session_state.salvou_apostas = False
 
         if st.session_state.salvou_apostas:
+            st.success("Seus palpites foram salvos com sucesso! 🎉")
             st.session_state.salvou_apostas = False
-            st.cache_data.clear()
-            st.rerun()
-            return
 
         todos_jogos = View.jogo_listar()
         meus_palpites = View.palpite_listar_por_usuario(usuario_id)
@@ -107,9 +105,13 @@ class fazerApostasUI:
             if len(palpites_lote) > 0:
                 View.palpite_inserir_lote(palpites_lote) # <-- Nova função!
                 
-                st.success(f"{len(palpites_lote)} palpite(s) salvos com sucesso!")
                 st.session_state.salvou_apostas = True
+                st.cache_data.clear() # Limpamos o cache aqui!
                 st.rerun()
+
+            else:
+                st.warning("Você precisa preencher o placar completo de pelo menos um jogo para salvar!")
+
 
     @classmethod
     def criar_card_jogo(cls, jogo):
@@ -131,7 +133,7 @@ class fazerApostasUI:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
                 st.number_input(
                     "Gols A", # Esse nome agora é invisível para o usuário
-                    min_value=0, max_value=20, step=1, value=0, 
+                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
                     key=f"gols_a_{jogo.get_id()}",
                     label_visibility="collapsed" # Mágica para esconder o rótulo
                 )
@@ -144,7 +146,7 @@ class fazerApostasUI:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
                 st.number_input(
                     "Gols B", 
-                    min_value=0, max_value=20, step=1, value=0, 
+                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
                     key=f"gols_b_{jogo.get_id()}",
                     label_visibility="collapsed"
                 )
