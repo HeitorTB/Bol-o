@@ -19,12 +19,57 @@ SIGLAS_PAISES = {
 }
 # -----------------------------------------------------------
 
+# --- CARD ISOLADO COM ST.FRAGMENT (SÓ ELE RECARREGA AO CLICAR) ---
+@st.fragment
+def criar_card_jogo(jogo):
+    with st.container(border=True):
+        col_titulo, col_toggle = st.columns([2, 1])
+        with col_titulo:
+            st.markdown(f"<h5 style='margin-top: 5px; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
+        with col_toggle:
+            # O estado deste botão altera apenas este bloco
+            ativado = st.toggle("Palpitar", key=f"ativar_{jogo.get_id()}")
+        
+        # --- BUSCA AS SIGLAS PARA AS BANDEIRAS ---
+        sigla_a = SIGLAS_PAISES.get(jogo.get_time_a(), "xx")
+        sigla_b = SIGLAS_PAISES.get(jogo.get_time_b(), "xx")
+        
+        # --- MONTA A TAG HTML DAS BANDEIRAS ---
+        img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; border-radius: 2px;'>" if sigla_a != "xx" else ""
+        img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; border-radius: 2px;'>" if sigla_b != "xx" else ""
+        
+        col_a, col_x, col_b = st.columns([2, 1, 2])
+        
+        with col_a:
+            st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
+            st.number_input(
+                "Gols A", 
+                min_value=0, max_value=20, step=1, value=0,
+                key=f"gols_a_{jogo.get_id()}",
+                label_visibility="collapsed",
+                disabled=not ativado
+            )
+            
+        with col_x:
+            st.markdown("<h4 style='text-align: center; margin-top: 25px;'>X</h4>", unsafe_allow_html=True)
+            
+        with col_b:
+            st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
+            st.number_input(
+                "Gols B", 
+                min_value=0, max_value=20, step=1, value=0,
+                key=f"gols_b_{jogo.get_id()}",
+                label_visibility="collapsed",
+                disabled=not ativado
+            )
+# -----------------------------------------------------------------
+
+
 class fazerApostasUI:
     @classmethod
     def main(cls):
         st.header("Faça seus Palpites 🎯")
         
-        # --- CSS AJUSTADO PARA O LAYOUT SEM FORM ---
         st.markdown("""
             <style>
             .block-container {
@@ -33,7 +78,6 @@ class fazerApostasUI:
             }
             </style>
         """, unsafe_allow_html=True)
-        # ---------------------------------------------
 
         st.info("Ative o interruptor de um jogo para liberar os botões de + e - e palpitar!")
 
@@ -64,21 +108,22 @@ class fazerApostasUI:
             st.success("Você já palpitou em todos os jogos disponíveis! 🎉 Vá para a aba 'Meus Palpites' para conferir.")
             return
 
-        # Renderização dos cards diretamente na tela (sem st.form)
+        # Renderização dos fragmentos de cards na tela
         for i in range(0, len(jogos_disponiveis), 2):
             cols = st.columns(2)
             
             with cols[0]:
                 jogo1 = jogos_disponiveis[i]
-                cls.criar_card_jogo(jogo1)
+                criar_card_jogo(jogo1)
             
             if i + 1 < len(jogos_disponiveis):
                 with cols[1]:
                     jogo2 = jogos_disponiveis[i+1]
-                    cls.criar_card_jogo(jogo2)
+                    criar_card_jogo(jogo2)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        # Botão de salvar comum que processa as informações instantaneamente
+        
+        # Botão principal de envio (Fora dos fragmentos, processa a página toda)
         submit = st.button("Salvar Meus Palpites", type="primary", use_container_width=True)
 
         # Lógica de Salvamento
@@ -86,6 +131,7 @@ class fazerApostasUI:
             palpites_lote = []
             
             for jogo in jogos_disponiveis:
+                # O botão principal consegue ler o session_state preenchido pelos fragmentos
                 ativado = st.session_state.get(f"ativar_{jogo.get_id()}")
                 
                 if ativado:
@@ -107,50 +153,3 @@ class fazerApostasUI:
                 st.rerun()
             else:
                 st.warning("Você precisa ativar o interruptor de pelo menos um jogo para salvar seus palpites!")
-
-
-    @classmethod
-    def criar_card_jogo(cls, jogo):
-        with st.container(border=True):
-            
-            col_titulo, col_toggle = st.columns([2, 1])
-            with col_titulo:
-                st.markdown(f"<h5 style='margin-top: 5px; color: gray;'>Jogo #{int(jogo.get_id())}</h5>", unsafe_allow_html=True)
-            with col_toggle:
-                # Captura o estado do interruptor na variável 'ativado'
-                ativado = st.toggle("Palpitar", key=f"ativar_{jogo.get_id()}")
-            
-            # --- BUSCA AS SIGLAS PARA AS BANDEIRAS ---
-            sigla_a = SIGLAS_PAISES.get(jogo.get_time_a(), "xx")
-            sigla_b = SIGLAS_PAISES.get(jogo.get_time_b(), "xx")
-            
-            # --- MONTA A TAG HTML DAS BANDEIRAS ---
-            img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; border-radius: 2px;'>" if sigla_a != "xx" else ""
-            img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; border-radius: 2px;'>" if sigla_b != "xx" else ""
-            
-            col_a, col_x, col_b = st.columns([2, 1, 2])
-            
-            with col_a:
-                st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
-                # O parâmetro disabled=not ativado faz a mágica acontecer
-                st.number_input(
-                    "Gols A", 
-                    min_value=0, max_value=20, step=1, value=0,
-                    key=f"gols_a_{jogo.get_id()}",
-                    label_visibility="collapsed",
-                    disabled=not ativado
-                )
-                
-            with col_x:
-                st.markdown("<h4 style='text-align: center; margin-top: 25px;'>X</h4>", unsafe_allow_html=True)
-                
-            with col_b:
-                st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
-                # O parâmetro disabled=not ativado faz a mágica acontecer
-                st.number_input(
-                    "Gols B", 
-                    min_value=0, max_value=20, step=1, value=0,
-                    key=f"gols_b_{jogo.get_id()}",
-                    label_visibility="collapsed",
-                    disabled=not ativado
-                )
