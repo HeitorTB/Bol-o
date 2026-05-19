@@ -133,7 +133,7 @@ class fazerApostasUI:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_a} <b>{jogo.get_time_a()}</b></div>", unsafe_allow_html=True)
                 st.number_input(
                     "Gols A", # Esse nome agora é invisível para o usuário
-                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
+                    min_value=0, max_value=20, step=1, value=0, placeholder="-",
                     key=f"gols_a_{jogo.get_id()}",
                     label_visibility="collapsed" # Mágica para esconder o rótulo
                 )
@@ -146,7 +146,7 @@ class fazerApostasUI:
                 st.markdown(f"<div style='margin-bottom: 5px; font-size: 14px;'>{img_b} <b>{jogo.get_time_b()}</b></div>", unsafe_allow_html=True)
                 st.number_input(
                     "Gols B", 
-                    min_value=0, max_value=20, step=1, value=None, placeholder="-",
+                    min_value=0, max_value=20, step=1, value=0, placeholder="-",
                     key=f"gols_b_{jogo.get_id()}",
                     label_visibility="collapsed"
                 )
