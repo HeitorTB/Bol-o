@@ -52,7 +52,7 @@ class MeusPalpitesUI:
             if not jogo:
                 continue 
 
-            # --- Extraindo variáveis originais (sem inversão no banco) ---
+            # --- Extraindo variáveis originais ---
             time_a = jogo.get_time_a()
             time_b = jogo.get_time_b()
             meu_gols_a = int(palpite.get_gols_time_a())
@@ -73,38 +73,14 @@ class MeusPalpitesUI:
                 else:
                     st.caption("Em Aberto")
                 
-                # 🔥 MUDANÇA ESTRUTURAL: Usamos HTML Flexbox flexível para forçar a linha a ficar 
-                # sempre junta e idêntica tanto no PC quanto no Celular, sem quebrar os elementos.
-                layout_html = f"""
-                <div style="
-                    display: flex; 
-                    justify-content: space-between; 
-                    align-items: center; 
-                    width: 100%; 
-                    font-size: 16px; 
-                    padding: 8px 0;
-                ">
-                    <div style="flex: 1; text-align: right; font-weight: bold; padding-right: 12px;">
-                        {time_a} {img_a}
-                    </div>
-                    
-                    <div style="
-                        background-color: #f0f2f6; 
-                        border-radius: 5px; 
-                        color: black; 
-                        font-weight: bold; 
-                        padding: 4px 16px; 
-                        text-align: center;
-                        white-space: nowrap;
-                    ">
-                        {meu_gols_a} x {meu_gols_b}
-                    </div>
-                    
-                    <div style="flex: 1; text-align: left; font-weight: bold; padding-left: 12px;">
-                        {img_b} {time_b}
-                    </div>
-                </div>
-                """
+                # Layout formatado em string linear simples para evitar falhas de parseamento do Streamlit
+                layout_html = (
+                    f"<div style='display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 16px; padding: 8px 0;'>"
+                    f"<div style='flex: 1; text-align: right; font-weight: bold; padding-right: 12px;'>{time_a} {img_a}</div>"
+                    f"<div style='background-color: #f0f2f6; border-radius: 5px; color: black; font-weight: bold; padding: 4px 16px; text-align: center; white-space: nowrap;'>{meu_gols_a} x {meu_gols_b}</div>"
+                    f"<div style='flex: 1; text-align: left; font-weight: bold; padding-left: 12px;'>{img_b} {time_b}</div>"
+                    f"</div>"
+                )
                 st.markdown(layout_html, unsafe_allow_html=True)
                 
                 st.divider() 
