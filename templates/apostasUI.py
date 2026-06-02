@@ -2,8 +2,6 @@ import streamlit as st
 from views import View
 
 # --- DICIONÁRIO DE SIGLAS (PADRÃO ISO) ---
-# Se esse arquivo for diferente do arquivo de apostas, 
-# você precisa ter o dicionário aqui também.
 SIGLAS_PAISES = {
     "Canadá": "ca", "Estados Unidos": "us", "México": "mx", "Curaçao": "cw",
     "Haiti": "ht", "Panamá": "pa", "Japão": "jp", "Irã": "ir",
@@ -51,11 +49,10 @@ class MeusPalpitesUI:
         for palpite in palpites:
             jogo = dic_jogos.get(palpite.get_jogo_id())
             
-            # Se por algum motivo o jogo foi apagado, pula para o próximo
             if not jogo:
                 continue 
 
-            # --- Extraindo variáveis para limpar o código visual ---
+            # --- Extraindo variáveis originais (sem inversão no banco) ---
             time_a = jogo.get_time_a()
             time_b = jogo.get_time_b()
             meu_gols_a = int(palpite.get_gols_time_a())
@@ -66,34 +63,50 @@ class MeusPalpitesUI:
             sigla_a = SIGLAS_PAISES.get(time_a, "xx")
             sigla_b = SIGLAS_PAISES.get(time_b, "xx")
             
-            # --- MONTA AS TAGS HTML DAS BANDEIRAS COM MARGEM ---
-            # Margem à esquerda (margin-left) pro time A e à direita (margin-right) pro time B
-            img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; margin-left: 8px; border-radius: 2px;'>" if sigla_a != "xx" else ""
-            img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; margin-right: 8px; border-radius: 2px;'>" if sigla_b != "xx" else ""
-
+            img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.1em; vertical-align: middle; margin-right: 6px; border-radius: 2px;'> " if sigla_a != "xx" else ""
+            img_b = f" <img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.1em; vertical-align: middle; margin-left: 6px; border-radius: 2px;'>" if sigla_b != "xx" else ""
 
             # --- Desenhando o Card ---
             with st.container(border=True):
-                
-                # Cabeçalho: Status
                 if finalizado:
                     st.caption("Finalizado")
                 else:
                     st.caption("Em Aberto")
                 
-                # Meio: Times e O Seu Palpite
-                col1, col2, col3 = st.columns([3, 2, 3])
+                # 🔥 MUDANÇA ESTRUTURAL: Usamos HTML Flexbox flexível para forçar a linha a ficar 
+                # sempre junta e idêntica tanto no PC quanto no Celular, sem quebrar os elementos.
+                layout_html = f"""
+                <div style="
+                    display: flex; 
+                    justify-content: space-between; 
+                    align-items: center; 
+                    width: 100%; 
+                    font-size: 16px; 
+                    padding: 8px 0;
+                ">
+                    <div style="flex: 1; text-align: right; font-weight: bold; padding-right: 12px;">
+                        {time_a} {img_a}
+                    </div>
+                    
+                    <div style="
+                        background-color: #f0f2f6; 
+                        border-radius: 5px; 
+                        color: black; 
+                        font-weight: bold; 
+                        padding: 4px 16px; 
+                        text-align: center;
+                        white-space: nowrap;
+                    ">
+                        {meu_gols_a} x {meu_gols_b}
+                    </div>
+                    
+                    <div style="flex: 1; text-align: left; font-weight: bold; padding-left: 12px;">
+                        {img_b} {time_b}
+                    </div>
+                </div>
+                """
+                st.markdown(layout_html, unsafe_allow_html=True)
                 
-                with col1:
-                    # Bandeira DEPOIS do nome (já que o texto é alinhado à direita)
-                    st.markdown(f"<div style='text-align: right;'><b>{time_a}</b> {img_a}</div>", unsafe_allow_html=True)
-                with col2:
-                    st.markdown(f"<div style='text-align: center; background-color: #f0f2f6; border-radius: 5px; color: black;'><b>{meu_gols_a} x {meu_gols_b}</b></div>", unsafe_allow_html=True)
-                with col3:
-                    # Bandeira ANTES do nome (já que o texto é alinhado à esquerda)
-                    st.markdown(f"<div style='text-align: left;'>{img_b} <b>{time_b}</b></div>", unsafe_allow_html=True)
-                
-                # Divisória nativa do Streamlit
                 st.divider() 
                 
                 # Rodapé: Placar Oficial e Pontuação
