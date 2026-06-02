@@ -36,7 +36,7 @@ class MeusPalpitesUI:
         usuario_id = st.session_state["usuario_id"]
         palpites = View.palpite_listar_por_usuario(usuario_id)
         
-        if not palindrome_placeholder := palpites:
+        if not palpites:
             st.info("Você ainda não fez nenhum palpite. Vá na aba de apostas!")
             return
 
@@ -63,7 +63,7 @@ class MeusPalpitesUI:
             sigla_a = SIGLAS_PAISES.get(time_a, "xx")
             sigla_b = SIGLAS_PAISES.get(time_b, "xx")
             
-            # --- AJUSTE DE DIAGRAMAÇÃO: Ajustamos o espaçamento para as bandeiras nas pontas externas ---
+            # --- AJUSTE DE DIAGRAMAÇÃO: Margens internas ajustadas ---
             img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; margin-right: 8px; border-radius: 2px;'>" if sigla_a != "xx" else ""
             img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; margin-left: 8px; border-radius: 2px;'>" if sigla_b != "xx" else ""
 
@@ -78,14 +78,13 @@ class MeusPalpitesUI:
                 col1, col2, col3 = st.columns([3, 2, 3])
                 
                 with col1:
-                    # Diagramação Corrigida: Alinhado à direita, mas colocando a bandeira ANTES do nome.
-                    # Isso cria uma separação visual perfeita em relação ao placar numérico.
+                    # Diagramação Corrigida: Bandeira ANTES do nome, mantendo alinhamento à direita.
                     st.markdown(f"<div style='text-align: right;'>{img_a} <b>{time_a}</b></div>", unsafe_allow_html=True)
                 with col2:
                     # Mantém o placar original (A x B) intacto no centro
                     st.markdown(f"<div style='text-align: center; background-color: #f0f2f6; border-radius: 5px; color: black;'><b>{meu_gols_a} x {meu_gols_b}</b></div>", unsafe_allow_html=True)
                 with col3:
-                    # Diagramação Corrigida: Alinhado à esquerda, colocando o nome primeiro e a bandeira DEPOIS.
+                    # Diagramação Corrigida: Nome primeiro e bandeira DEPOIS, mantendo alinhamento à esquerda.
                     st.markdown(f"<div style='text-align: left;'><b>{time_b}</b> {img_b}</div>", unsafe_allow_html=True)
                 
                 st.divider() 
