@@ -63,7 +63,7 @@ class MeusPalpitesUI:
             sigla_a = SIGLAS_PAISES.get(time_a, "xx")
             sigla_b = SIGLAS_PAISES.get(time_b, "xx")
             
-            # --- AJUSTE DE DIAGRAMAÇÃO: Margens internas ajustadas ---
+            # --- AJUSTE DE DIAGRAMAÇÃO ---
             img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; margin-right: 8px; border-radius: 2px;'>" if sigla_a != "xx" else ""
             img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; margin-left: 8px; border-radius: 2px;'>" if sigla_b != "xx" else ""
 
@@ -78,13 +78,11 @@ class MeusPalpitesUI:
                 col1, col2, col3 = st.columns([3, 2, 3])
                 
                 with col1:
-                    # Diagramação Corrigida: Bandeira ANTES do nome, mantendo alinhamento à direita.
                     st.markdown(f"<div style='text-align: right;'>{img_a} <b>{time_a}</b></div>", unsafe_allow_html=True)
                 with col2:
-                    # Mantém o placar original (A x B) intacto no centro
-                    st.markdown(f"<div style='text-align: center; background-color: #f0f2f6; border-radius: 5px; color: black;'><b>{meu_gols_a} x {meu_gols_b}</b></div>", unsafe_allow_html=True)
+                    # 🔄 TROCADO APENAS OS GOLS DO PALPITE AQUI: b x a
+                    st.markdown(f"<div style='text-align: center; background-color: #f0f2f6; border-radius: 5px; color: black;'><b>{meu_gols_b} x {meu_gols_a}</b></div>", unsafe_allow_html=True)
                 with col3:
-                    # Diagramação Corrigida: Nome primeiro e bandeira DEPOIS, mantendo alinhamento à esquerda.
                     st.markdown(f"<div style='text-align: left;'><b>{time_b}</b> {img_b}</div>", unsafe_allow_html=True)
                 
                 st.divider() 
@@ -95,7 +93,8 @@ class MeusPalpitesUI:
                     oficial_gols_b = int(jogo.get_gols_time_b())
                     pontos = palpite.get_pontos_ganhos()
                     
-                    st.markdown(f"<div style='text-align: center; font-size: 14px;'>Placar Oficial: <b>{oficial_gols_a} x {oficial_gols_b}</b></div>", unsafe_allow_html=True)
+                    # 🔄 TROCADO APENAS OS GOLS OFICIAIS AQUI: b x a
+                    st.markdown(f"<div style='text-align: center; font-size: 14px;'>Placar Oficial: <b>{oficial_gols_b} x {oficial_gols_a}</b></div>", unsafe_allow_html=True)
                     st.markdown(f"<div style='text-align: center; color: #28a745; font-size: 14px;'><b>Pontos: {pontos}</b></div>", unsafe_allow_html=True)
                 else:
                     st.markdown("<div style='text-align: center; font-size: 13px; color: gray;'>Aguardando resultado...</div>", unsafe_allow_html=True)
