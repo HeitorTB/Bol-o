@@ -2,8 +2,6 @@ import streamlit as st
 from views import View
 
 # --- DICIONÁRIO DE SIGLAS (PADRÃO ISO) ---
-# Se esse arquivo for diferente do arquivo de apostas, 
-# você precisa ter o dicionário aqui também.
 SIGLAS_PAISES = {
     "Canadá": "ca", "Estados Unidos": "us", "México": "mx", "Curaçao": "cw",
     "Haiti": "ht", "Panamá": "pa", "Japão": "jp", "Irã": "ir",
@@ -38,7 +36,7 @@ class MeusPalpitesUI:
         usuario_id = st.session_state["usuario_id"]
         palpites = View.palpite_listar_por_usuario(usuario_id)
         
-        if not palpites:
+        if not palindrome_placeholder := palpites:
             st.info("Você ainda não fez nenhum palpite. Vá na aba de apostas!")
             return
 
@@ -51,11 +49,10 @@ class MeusPalpitesUI:
         for palpite in palpites:
             jogo = dic_jogos.get(palpite.get_jogo_id())
             
-            # Se por algum motivo o jogo foi apagado, pula para o próximo
             if not jogo:
                 continue 
 
-            # --- Extraindo variáveis para limpar o código visual ---
+            # --- Extraindo variáveis ---
             time_a = jogo.get_time_a()
             time_b = jogo.get_time_b()
             meu_gols_a = int(palpite.get_gols_time_a())
@@ -66,34 +63,31 @@ class MeusPalpitesUI:
             sigla_a = SIGLAS_PAISES.get(time_a, "xx")
             sigla_b = SIGLAS_PAISES.get(time_b, "xx")
             
-            # --- MONTA AS TAGS HTML DAS BANDEIRAS COM MARGEM ---
-            # Margem à esquerda (margin-left) pro time A e à direita (margin-right) pro time B
-            img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; margin-left: 8px; border-radius: 2px;'>" if sigla_a != "xx" else ""
-            img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; margin-right: 8px; border-radius: 2px;'>" if sigla_b != "xx" else ""
-
+            # --- AJUSTE DE DIAGRAMAÇÃO: Ajustamos o espaçamento para as bandeiras nas pontas externas ---
+            img_a = f"<img src='https://flagcdn.com/w40/{sigla_a}.png' style='height: 1.2em; vertical-align: middle; margin-right: 8px; border-radius: 2px;'>" if sigla_a != "xx" else ""
+            img_b = f"<img src='https://flagcdn.com/w40/{sigla_b}.png' style='height: 1.2em; vertical-align: middle; margin-left: 8px; border-radius: 2px;'>" if sigla_b != "xx" else ""
 
             # --- Desenhando o Card ---
             with st.container(border=True):
                 
-                # Cabeçalho: Status
                 if finalizado:
                     st.caption("Finalizado")
                 else:
                     st.caption("Em Aberto")
                 
-                # Meio: Times e O Seu Palpite
                 col1, col2, col3 = st.columns([3, 2, 3])
                 
                 with col1:
-                    # Bandeira DEPOIS do nome (já que o texto é alinhado à direita)
-                    st.markdown(f"<div style='text-align: right;'><b>{time_a}</b> {img_a}</div>", unsafe_allow_html=True)
+                    # Diagramação Corrigida: Alinhado à direita, mas colocando a bandeira ANTES do nome.
+                    # Isso cria uma separação visual perfeita em relação ao placar numérico.
+                    st.markdown(f"<div style='text-align: right;'>{img_a} <b>{time_a}</b></div>", unsafe_allow_html=True)
                 with col2:
+                    # Mantém o placar original (A x B) intacto no centro
                     st.markdown(f"<div style='text-align: center; background-color: #f0f2f6; border-radius: 5px; color: black;'><b>{meu_gols_a} x {meu_gols_b}</b></div>", unsafe_allow_html=True)
                 with col3:
-                    # Bandeira ANTES do nome (já que o texto é alinhado à esquerda)
-                    st.markdown(f"<div style='text-align: left;'>{img_b} <b>{time_b}</b></div>", unsafe_allow_html=True)
+                    # Diagramação Corrigida: Alinhado à esquerda, colocando o nome primeiro e a bandeira DEPOIS.
+                    st.markdown(f"<div style='text-align: left;'><b>{time_b}</b> {img_b}</div>", unsafe_allow_html=True)
                 
-                # Divisória nativa do Streamlit
                 st.divider() 
                 
                 # Rodapé: Placar Oficial e Pontuação
