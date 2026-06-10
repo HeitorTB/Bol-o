@@ -28,8 +28,8 @@ class regrasUI:
         st.header("🏆 Regras de Premiação")
         st.markdown("""
         1. Serão premiados o **Primeiro**, **Segundo** e **Terceiro** lugar.
-        2. O valor arrecadado será dividido assim: **Primeiro Lugar 60%**; **Segundo Lugar 25%** e **Terceiro Lugar 10%**.
-        3. **5%** do valor arrecadado é destinado para taxa de administração.
+        2. O valor arrecadado será dividido assim: **Primeiro Lugar 60%**; **Segundo Lugar 20%** e **Terceiro Lugar 10%**.
+        3. **10%** do valor arrecadado é destinado para taxa de administração.
         4. **CRITÉRIO DE DESEMPATE:** Em caso de empate no total dos pontos, o critério de desempate será definido pelo número de vezes de acerto do placar cheio (Regra 1 de Pontuação). Persistindo o empate, o número de acertos da regra seguinte (Regra 2) será utilizado como critério, e assim sucessivamente até a Regra 6. Caso o empate persista de todas as formas, o prêmio será dividido.
         """)
 
