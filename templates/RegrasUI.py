@@ -39,5 +39,5 @@ class regrasUI:
         st.header("🤝 Sobre a Participação")
         st.markdown("""
         1. O valor para a participação é **R$ 30,00**.
-        2. O formulário de palpites estará disponível até o dia **10/06/2026**, antes do primeiro jogo.
+        2. O formulário de palpites estará disponível até o dia **11/06/2026**, às 13 horas.
         """)
