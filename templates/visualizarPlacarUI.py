@@ -23,9 +23,11 @@ class VisualizarPlacarUI:
                 "Pontos Totais": u.pontos_temp # Usamos o valor somado
             })
 
-        # 3. Exibe a tabela
+        # 3. Exibe a tabela com colocação
         df = pd.DataFrame(dados)
-        df.index = df.index + 1 # Posição 1, 2, 3...
-        
+        df.index = df.index + 1
+        df.reset_index(inplace=True)
+        df.rename(columns={"index": "Colocação"}, inplace=True)
+
         st.write("---")
-        st.table(df) # Usar st.table fica bem elegante para rankings fixa
+        st.table(df)  # Usar st.table fica bem elegante para rankings fixos
