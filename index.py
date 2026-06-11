@@ -15,7 +15,7 @@ class IndexUI:
         # Menu superior horizontal
         op = option_menu(
             menu_title=None,
-            options=["Entrar", "Abrir Conta"],
+            options=["Entrar"],
             icons=["box-arrow-in-right", "person-plus"], # Ícones do Bootstrap
             orientation="horizontal"
         )
