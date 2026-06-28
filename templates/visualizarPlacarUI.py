@@ -8,6 +8,8 @@ class VisualizarPlacarUI:
         st.header("Ranking Geral 🏆")
         st.write("Acompanhe quem são os melhores palpiteiros do bolão!")
 
+        st.header("Campeão: Charles!!!")
+
         # 1. Chama a nova função que soma os palpites em tempo real
         usuarios_ranking = View.ranking_geral()
 
@@ -30,4 +32,4 @@ class VisualizarPlacarUI:
         df.rename(columns={"index": "Colocação"}, inplace=True)
 
         st.write("---")
-        st.table(df)  # Usar st.table fica bem elegante para rankings fixos
+        st.table(df)  
