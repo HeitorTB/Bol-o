@@ -8,8 +8,12 @@ class VisualizarPlacarUI:
         st.header("Ranking Geral 🏆")
         st.write("Acompanhe quem são os melhores palpiteiros do bolão!")
 
-        st.header("Campeão: Charles!!!")
+        st.header("Ouro: Charles!")
+        st.header("Prata: Gustavo Leão")
+        st.header("Bronze: Sayonara")
 
+        st.write("Parabéns a todos, até daqui a 4 anos!")
+ 
         # 1. Chama a nova função que soma os palpites em tempo real
         usuarios_ranking = View.ranking_geral()
 
